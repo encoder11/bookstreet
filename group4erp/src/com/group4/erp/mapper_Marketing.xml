@@ -1,0 +1,415 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+	<!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.MarketingDAO">
+	 
+	<sql id="eventWhere">
+		<if test="searchKeyword !=null">
+				and (
+					upper(ei.evnt_no) like upper('%${searchKeyword}%') 
+					or upper(ei.evnt_title) like upper('%${searchKeyword}%')
+					or upper(ei.tot_est_cost) like upper('%${searchKeyword}%')
+					or upper(ei.tot_cost) like upper('%${searchKeyword}%')
+					or upper(ei.evnt_start_dt) like upper('%${searchKeyword}%')
+					or upper(ei.evnt_end_dt) like upper('%${searchKeyword}%')
+					or upper((select s.evnt_state_name from code_ad_state s where s.evnt_state_cd = ei.evnt_state_cd)) like upper('%${searchKeyword}%')
+				)			
+		</if>
+		
+		<if test="evnt_stat != null">
+			and
+			<foreach collection="evnt_stat" item="evnt_stat"  open="(" separator=" or " close=")">
+				<if test="evnt_stat.equals('01')">
+					ei.evnt_state_cd='01'
+				</if>
+				<if test="evnt_stat.equals('02')">
+					ei.evnt_state_cd='02'
+				</if>
+				<if test="evnt_stat.equals('03')">
+					ei.evnt_state_cd='03'
+				</if>
+				<if test="evnt_stat.equals('04')">
+					ei.evnt_state_cd='04'
+				</if>				
+			</foreach>			
+		</if>
+		
+		<if test="evnt_category != null">
+			and
+			<foreach collection="evnt_category" item="evnt_category"  open="(" separator=" or " close=")">
+				<if test="evnt_category.equals('01')">
+					ei.evnt_cd='01'
+				</if>
+				<if test="evnt_category.equals('02')">
+					ei.evnt_cd='02'
+				</if>
+				<if test="evnt_category.equals('03')">
+					ei.evnt_cd='03'
+				</if>
+				<if test="evnt_category.equals('04')">
+					ei.evnt_cd='04'
+				</if>
+				<if test="evnt_category.equals('05')">
+					ei.evnt_cd='05'
+				</if>
+				<if test="evnt_category.equals('06')">
+					ei.evnt_cd='06'
+				</if>
+				<if test="evnt_category.equals('07')">
+					ei.evnt_cd='07'
+				</if>			
+			</foreach>			
+		</if>
+	</sql>
+	
+	<sql id="headerSort">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null or sort==''">
+			order by 1 desc
+		</if>
+	</sql>
+	
+	<select id='getEventCnt' parameterType="com.group4.erp.EventSearchDTO" resultType="int">
+		select count(*) from event_info ei
+		where 1=1
+		and ei.evnt_state_cd != '0'
+		and ei.emp_no = #{emp_no}
+	</select>
+	
+	
+	<select id='getEventList' parameterType="com.group4.erp.EventSearchDTO" resultType="com.group4.erp.EventDTO">
+		select * from (select zzz.*, rownum RNUM from (
+			select
+				ei.evnt_no "evnt_no",
+				(select e.emp_name from employee e where e.emp_no= ei.emp_no) "emp_name",
+				(select c.event_type from code_event c where c.event_cd = ei.evnt_cd) "evnt_category",
+				ei.evnt_title "evnt_title",
+				ei.tot_est_cost||'' "tot_est_cost",
+				ei.tot_cost||'' "tot_cost",
+				to_char(ei.evnt_start_dt, 'yyyy-mm-dd') || '('||to_char(ei.evnt_start_dt, 'dy', 'nls_date_language=Korean' )||')' "evnt_start_dt",
+				to_char(ei.evnt_end_dt, 'yyyy-mm-dd') || '('||to_char(ei.evnt_start_dt, 'dy', 'nls_date_language=Korean' )||')' "evnt_end_dt",
+				(select s.evnt_state_name from code_ad_state s where s.evnt_state_cd = ei.evnt_state_cd) "evnt_stat",
+				ei.evnt_comment "evnt_comment",
+				ei.atchd_data "atchd_data"
+			from event_info ei
+			where 1=1	
+			and ei.evnt_state_cd != '0'
+			<include refid="eventWhere" />
+			<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+			</if>
+			<if test="sort==null or sort==''">
+			order by 1 desc
+			</if>
+		) zzz) 
+		where RNUM&gt;=${selectPageNo * rowCntPerPage - rowCntPerPage +1} and RNUM&lt;=${selectPageNo * rowCntPerPage}
+	</select>
+
+	 
+	<select id='getEventAllCnt' parameterType="com.group4.erp.EventSearchDTO" resultType="int">
+		select count(*) from event_info ei
+		where 1=1
+		and ei.evnt_state_cd != '0'
+		<include refid="eventWhere" />
+	</select>
+	
+	
+	<select id='getEventNumForApproval' resultType="int">
+		select count(*) from event_info ei
+		where 1=1
+	</select>
+	
+	
+	<select id='getAdApplyCnt' resultType="int">
+		select count(*) from ad_apply_info
+	</select>
+	
+	<select id='getAdApplyList' resultType="com.group4.erp.AdApplyDTO">
+		select
+        	ai.ad_apply_no||'' "ad_apply_no",
+        	ai.corp_no "corp_no",
+        	ai.applicant_name "applicant_name",
+        	ai.ad_title "ad_title",
+        	ai.reg_dt "reg_dt",
+        	ai.open_req_dt "open_req_dt",
+        	ai.ad_term "ad_term",
+        	(select c.open_req_area_name from code_open_req_area c where c.open_req_area_cd = ai.open_req_area_cd) "open_req_area",
+        	(select s.evnt_state_name from code_ad_state s where s.evnt_state_cd = ai.ad_state_cd) "ad_stat"
+        from ad_apply_info ai
+        order by ai.ad_apply_no
+	</select>
+	
+	<insert id="insertEvent" parameterType="com.group4.erp.EventDTO">
+		insert into event_info(
+			evnt_no, 
+			emp_no, 
+			evnt_cd, 
+			evnt_title, 
+			tot_est_cost, 
+			tot_cost, 
+			evnt_start_dt,
+			evnt_end_dt,
+			evnt_state_cd,
+			evnt_comment, 
+			atchd_data
+			)
+			values (
+			  #{evnt_no},	
+			  #{emp_no},
+			  #{evnt_cd},
+			  #{evnt_title},
+			  #{tot_est_cost},
+			  #{tot_est_cost},
+			  #{evnt_start_dt},
+			  #{evnt_end_dt},
+			  1,
+			  #{evnt_comment},
+			  null
+			)
+	</insert>
+	
+	<select id="getCorpList" resultType="com.group4.erp.CorporationDTO">
+		select
+			corp_no "corp_no",
+			corp_name "corp_name",
+			ceo_name "ceo_name"
+		from corporation_cus
+		where 1=1
+	</select>
+	
+	<insert id="insertAd" parameterType="com.group4.erp.AdApplyDTO">
+		insert into ad_apply_info(
+			ad_apply_no,
+			corp_no,
+			applicant_name,
+			emp_no,
+			ad_title,
+			img_doc,
+			reg_dt,
+			open_req_dt,
+			open_req_area_cd,
+			ad_term,
+			ad_pay_method,
+			ad_state_cd
+		) values (
+			(select nvl(max(ad_apply_no),0)+1 from ad_apply_info),
+			#{corp_no},
+			(select c.ceo_name from corporation_cus c where c.corp_no=#{corp_no}),
+			#{emp_no},
+			#{ad_title},
+			#{img_doc},
+			sysdate,
+			#{open_req_dt},
+			#{open_req_area_cd},
+			#{ad_term},
+			#{ad_pay_method},
+			1
+		)
+	</insert>
+	
+	
+	<update id="updateAdInfo" parameterType="com.group4.erp.AdApplyDTO">	
+			update ad_apply_info set 				
+				ad_title = #{ad_title},
+				open_req_dt = #{open_req_dt},
+				ad_term = #{ad_term}
+			where ad_apply_no = #{ad_apply_no}
+			
+	</update>
+	
+	
+	<select id="getOnlineOrderCnt" parameterType="com.group4.erp.SalesInfoDTO" resultType="int">
+		select count(*) from order_info oi
+		where 1=1
+		<include refid="onlineOrderWhere" />
+	</select>
+	
+	<select id="getOnlineOrderList" parameterType="com.group4.erp.SalesInfoDTO" resultType="com.group4.erp.OrderDTO">
+		select * from (select zzz.*, rownum RNUM from (
+			select
+				oi.order_no||'' "order_no",
+				oi.order_id "order_id",
+				oi.order_pwd "order_pwd",
+				oi.order_delivery_addr "order_delivery_addr",
+				oi.isbn13 "isbn13",
+				(select b.book_price from book b where b.isbn13 = oi.isbn13) "book_price",
+				oi.book_qty||'' "book_qty",
+				(select b.book_price from book b where b.isbn13 = oi.isbn13) * oi.book_qty "tot_cost",
+				oi.cus_requirement "cus_requirement",
+				oi.is_member "is_member",
+				to_char(oi.order_dt, 'yyyy-mm-dd HH24:MI:SS') || '('||to_char(oi.order_dt, 'dy', 'nls_date_language=Korean' )||')' "order_dt"
+			from order_info oi
+			where 1=1
+			<include refid="onlineOrderWhere" />
+		) zzz) where RNUM&gt;= ${selectPageNo * rowCntPerPage - rowCntPerPage +1} and RNUM&lt;=${selectPageNo * rowCntPerPage}
+	</select>
+	
+	
+	<sql id="onlineOrderWhere">
+		<if test="searchKeyword !=null">
+				and (
+					upper(oi.order_no) like upper('%${searchKeyword}%') 
+					or upper(oi.order_id) like upper('%${searchKeyword}%')
+					or upper(oi.order_pwd) like upper('%${searchKeyword}%')
+					or upper(oi.order_delivery_addr) like upper('%${searchKeyword}%')
+					or upper(oi.isbn13) like upper('%${searchKeyword}%')
+					or upper(oi.cus_requirement) like upper('%${searchKeyword}%')
+					or upper(oi.book_qty) like upper('%${searchKeyword}%')
+					or upper(oi.is_member) like upper('%${searchKeyword}%')
+				)			
+		</if>
+	</sql>
+	
+	<select id="getTotRevenue" resultType="int">
+		 select
+            sum((select b.book_price from book b where b.isbn13 = oi.isbn13) * oi.book_qty) "tot_revenue"
+        from order_info oi
+	
+	</select>
+	
+	
+	<update id="deleteEvnt" parameterType="map">	
+			update event_info set evnt_state_cd = 0
+			where evnt_no in (
+			<foreach collection="array" item="evnt_no" index="index" separator=",">
+				#{evnt_no}
+			</foreach>
+			)
+	</update>
+	
+	
+	<update id="updateEventInfo" parameterType="com.group4.erp.EventDTO">	
+			update event_info set 	
+				evnt_cd = #{evnt_cd},			
+				evnt_title = #{evnt_title},
+				evnt_start_dt = #{evnt_start_dt},
+				evnt_end_dt = #{evnt_end_dt},
+				evnt_comment = #{evnt_comment}
+			where evnt_no = #{evnt_no}
+			
+	</update>
+	
+	
+	<update id="updateEvntState">	
+			update event_info set evnt_state_cd = 4
+			where evnt_end_dt&lt;sysdate
+	</update>
+	
+	<update id="updateEvntApprovalState" parameterType="com.group4.erp.EventDTO">	
+			update event_info set evnt_state_cd = #{evnt_state_cd}
+			where evnt_no = #{document_no}
+	</update>
+	
+	<select id="getCorpOrderTotCnt" resultType="int">
+		select count(*) from corp_order_info
+		where corp_no is not null
+	</select>
+	
+	<select id="getCorpTotRevenue" resultType="int">
+		select
+            sum((select b.book_price from book b where b.isbn13 = co.isbn13) * co.books_qty) "tot_revenue"
+        from corp_order_info co
+        where co.corp_no is not null
+	</select>
+	
+	<select id="getOrderInfoChart" resultType="com.group4.erp.SalesInfoDTO">
+		select      
+            cc.cat_name "category",
+            nvl( (select sum(oi.book_qty) from order_info oi, book b where oi.isbn13 = b.isbn13 and b.cat_cd = cc.cat_cd ), 0) "book_qty",
+            nvl( (select sum(oi.book_qty) from order_info oi, book b, return_sale_info r where oi.isbn13 = b.isbn13 and b.cat_cd = cc.cat_cd and oi.order_no = r.order_no), 0) "return_qty"    
+        from code_category cc
+	</select>
+	
+	
+	<select id="getCorpOrderCntChart" resultType="com.group4.erp.CorpOrderDTO">
+		select      
+            cc.cat_name "category",
+            nvl( (select sum(oi.books_qty) from corp_order_info oi, book b where oi.isbn13 = b.isbn13 and b.cat_cd = cc.cat_cd ), 0) "books_qty"    
+        from code_category cc
+	</select>
+	
+	<select id="getDailyOrderCntChart" resultType="com.group4.erp.SalesInfoDTO">
+		select count(*) "book_qty",
+            to_char(order_dt, 'yy-mm-dd') "order_dt" 
+        from order_info
+        <!-- where to_char(order_dt, 'yy-mm') = to_char(add_months(sysdate, -1), 'yy-mm') -->
+        group by to_char(order_dt, 'yy-mm-dd')
+        order by 2
+		
+	</select>
+	
+	<select id="getDailyCorpOrderCntChart" resultType="com.group4.erp.SalesInfoDTO">
+		select count(*) "book_qty",
+            to_char(order_dt, 'yy-mm-dd') "order_dt" 
+        from corp_order_info
+        group by to_char(order_dt, 'yy-mm-dd')
+        order by 2
+		
+	</select>
+	
+	
+	<select id="getDailyOfflineSalesChart" resultType="com.group4.erp.SalesInfoDTO">
+		select
+            extract(year from add_months(sysdate, -1) )||'.' ||(extract(month from add_months(sysdate, -1) ) )||'.'||c.date_name "buy_dt",
+            (select count(*) "BOOK_ONLINE_QTY" from order_info o where to_char(o.order_dt, 'dd')=c.date_cd) "online_cnt",
+            (select count(*) "BOOK_OFFLINE_QTY" from buy_offline_info f where to_char(f.buy_dt, 'dd')=c.date_cd) "offline_cnt"
+        from code_date c
+        where c.date_cd&lt;=30
+	
+		<!-- select
+    		count(*) "book_qty",
+    		to_char(buy_dt, 'yy-mm-dd') "buy_dt"
+    	from buy_offline_info
+    	group by to_char(buy_dt, 'yy-mm-dd')
+    	order by 2 -->
+		
+	</select>
+	
+	
+	<select id="getMyEventInfoApproval" parameterType="String" resultType="com.group4.erp.EventDTO">
+       	select
+			i.evnt_no "evnt_no",
+			i.emp_no "emp_no",
+			(select e.emp_name from employee e where e.emp_no=(select ee.mgr_emp_no from employee ee where ee.emp_no = i.emp_no) ) "mgr_name",
+			(select c.jikup from code_jikup c
+        		where c.jikup_cd = (select e.jikup_cd from employee e 
+        							where e.emp_no=(select ee.emp_no from event_info ee where ee.evnt_no=i.evnt_no) ) ) "jikup",
+			(select e.emp_name from employee e where e.emp_no=i.emp_no) "emp_name",
+			(select to_char(ap.e_works_req_dt, 'yyyy-mm-dd') || '('||to_char(ap.e_works_req_dt, 'dy', 'nls_date_language=Korean' )||')' from e_works_info ap where ap.document_no = i.evnt_no) "reg_dt",
+			i.evnt_title "evnt_title",
+			i.tot_est_cost "tot_est_cost",
+			i.tot_cost "tot_cost",
+			to_char(i.evnt_start_dt, 'yyyy-mm-dd') || '('||to_char(i.evnt_start_dt, 'dy', 'nls_date_language=Korean' )||')' "evnt_start_dt",
+			to_char(i.evnt_end_dt, 'yyyy-mm-dd') || '('||to_char(i.evnt_end_dt, 'dy', 'nls_date_language=Korean' )||')' "evnt_end_dt",
+			i.evnt_state_cd "evnt_state_cd",
+			nvl(i.evnt_comment, '없음') "evnt_comment",
+			nvl(i.atchd_data, '없음') "atchd_data"
+		from event_info i
+		where i.evnt_no=#{evnt_no}
+	</select>
+	
+	
+	<update id="updateEventReApproval" parameterType="String">
+		update event_info set evnt_state_cd='1'
+		where evnt_no = #{document_no}
+	</update>
+	
+	
+	<select id="getDailyOfflineSalesTotCnt" resultType="com.group4.erp.SalesInfoDTO">
+		select
+			count(*) "tot_cnt",
+			sum(tot_cost) "tot_revenue"
+		from buy_offline_info
+	</select>
+	
+		
+</mapper>

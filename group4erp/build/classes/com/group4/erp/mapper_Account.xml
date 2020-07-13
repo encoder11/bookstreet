@@ -1,0 +1,419 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+	<!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.AccountDAO">
+	<!-- 로그인 아이디, 암호의 존재 개수를 검색하는 select문을 내포한 <select> 태그 선언 -->
+	<!-- 
+		* <select> 태그 속성 설명
+		id="getAdminCnt" ==> SQL 구문의 고유 아이디값 설정. DAO 클래스의 메소드 이름과 동일
+		parameterType="hashmap" ==> SQL 구문에 삽입될 외부 데이터의 자료형 설정
+		resultType="int" ==> SQL 구문의 실행 후 리턴값 자료형 설정
+		
+		* SQL 구문 안의 #{HashMap객체키값명} 설명
+		키값에 대응하는 데이터가 문자열을 삽입하라는 뜻이다. 만약 문자면 ''(싱글쿼트)로 감싸 삽입하고 아니면 그대로 삽입한다.
+		
+		* SQL 구문 안의 #{HashMap객체키값명} 설명
+		키값에 대응하는 데이터의 종류에 관계없이 데이터를 그대로 삽입
+	
+	 -->  
+	
+	<sql id="headerSort">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null or sort.length() == 0">
+			order by cc.reg_dt desc
+		</if>
+	</sql>
+
+
+	<sql id="whereCondition">
+		<if test="searchKeyword !=null and searchKeyword.length()>0">
+				and (
+					upper(cc.corp_no) like upper('%${searchKeyword}%') 
+					or upper(cc.corp_name) like upper('%${searchKeyword}%')
+					or upper(cc.ceo_name) like upper('%${searchKeyword}%')
+					or upper(cc.corp_addr) like upper('%${searchKeyword}%')
+					or upper(cc.corp_fax) like upper('%${searchKeyword}%')
+					or upper(cc.corp_business_area) like upper('%${searchKeyword}%')
+				)			
+		</if>
+		
+		<if test="corp_business_area != null">
+			and
+			<foreach collection="corp_business_area" item="corp_business_area" open="(" separator=" or " close=")" >
+				<if test="corp_business_area==1">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==2">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==3">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==4">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==5">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==6">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==7">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==8">
+					cc.corp_business_area=#{corp_business_area}
+				</if>
+				<if test="corp_business_area==0">
+					
+				</if>
+			</foreach>			
+		</if>
+	</sql>
+
+
+	<select id='getCorpListCnt' parameterType="com.group4.erp.CorpSearchDTO" resultType="int">
+		select count(*) from corporation_cus cc
+		where 1=1
+		and cc.is_on_business='y'
+		<include refid="whereCondition" />
+
+	</select>
+	
+	
+	<select id='getCorpList' parameterType="com.group4.erp.CorpSearchDTO" resultType="com.group4.erp.CorporationDTO">
+		select * from (select zzz.*, rownum RNUM from (
+			select
+				cc.corp_no "corp_no",
+				cc.corp_name "corp_name",
+				cc.ceo_name "ceo_name",
+				cc.corp_addr "corp_addr",
+				cc.corp_fax "corp_fax",
+				cc.corp_tel "corp_tel",
+				cc.corp_business_area "corp_business_area", 
+				(select c.business_area_name from code_business_area c where c.business_area_code = cc.corp_business_area) "corp_business_name",
+				cc.is_on_business "is_on_business",
+				cc.reg_dt "reg_dt"
+			from corporation_cus cc
+			where 1=1 and
+			cc.is_on_business='y'
+			<include refid="whereCondition" />
+			<include refid="headerSort" />			
+		) zzz) 
+		where RNUM&gt;= ${selectPageNo * rowCntPerPage - rowCntPerPage +1} and RNUM&lt;=${selectPageNo * rowCntPerPage}
+	</select>
+	
+
+	
+
+	
+	<select id='getCorpInfo' parameterType="String" resultType="com.group4.erp.CorporationDTO">
+		
+		select
+			corp_no "corp_no",
+			corp_name "corp_name",
+			ceo_name "ceo_name",
+			corp_addr "corp_addr",
+			corp_fax "corp_fax",
+			corp_tel "corp_tel",
+			corp_business_area "corp_business_area"
+		from corporation_cus
+		where 1=1 
+		and corp_no = #{corp_no}
+			
+	</select>
+	
+	<insert id="insertCorp" parameterType="com.group4.erp.CorporationDTO">
+		insert into corporation_cus(
+			corp_no, 
+			corp_name, 
+			ceo_name, 
+			corp_addr, 
+			corp_fax, 
+			corp_tel, 
+			corp_business_area,
+			is_on_business,
+			reg_dt 
+			) values (
+			  #{corp_no},	
+			  #{corp_name},
+			  #{ceo_name},
+			  #{corp_addr},
+			  #{corp_fax},
+			  #{corp_tel},
+			  #{corp_business_area},
+			  'y',
+			  sysdate
+			)
+	</insert>
+	
+	<update id="deleteCorp" parameterType="map">
+		
+			update corporation_cus set is_on_business='n'
+			where corp_no in (
+			<foreach collection="array" item="corp_no" index="index" separator=",">
+				#{corp_no}
+			</foreach>
+			)
+	</update>
+	
+	
+	<select id='getCorpOrderCnt' parameterType = "com.group4.erp.CorpSearchDTO" resultType="int">
+		select count(*) from corp_order_info where corp_no is not null
+		
+	</select>
+	
+	<select id='getCorpOrderList' parameterType = "com.group4.erp.CorpSearchDTO" resultType="com.group4.erp.CorpOrderDTO">
+	select * from (select zzz.*, rownum RNUM from (
+		select
+			order_books_no "order_books_no",
+			corp_no "corp_no",
+			corp_name "corp_name",
+			ceo_name "ceo_name",
+			books_qty "books_qty",
+			book_price "book_price",
+			tot_cost "tot_cost",
+			order_dt "order_dt",
+			issue "issueYn"
+		from (
+			select 
+				co.order_books_no||'' "ORDER_BOOKS_NO",
+    			co.corp_no "CORP_NO",
+    			(select cc.corp_name from corporation_cus cc where cc.corp_no = co.corp_no) "CORP_NAME",   
+    			(select cc.ceo_name from corporation_cus cc where cc.corp_no = co.corp_no) "CEO_NAME",
+    			co.books_qty "BOOKS_QTY",
+    			(select b.book_price from book b where b.isbn13= co.isbn13) "BOOK_PRICE",
+    			( (select b.book_price from book b where b.isbn13= co.isbn13) * co.books_qty) "TOT_COST",
+    			to_char(co.order_dt, 'yyyy.mm.dd')|| '('||to_char(co.order_dt, 'dy', 'nls_date_language=Korean' )||')' "ORDER_DT",
+    			(select count(*) from tran_issue_info ti where ti.order_no = co.order_books_no) "ISSUE"
+    		from corp_order_info co
+		)
+		where corp_no is not null
+    	<include refid="CorpCondition" />
+    	<include refid="issueYnWhere" />
+    	<include refid="CorpOrderHeaderSort" />
+	) zzz) where RNUM&gt;= ${selectPageNo * rowCntPerPage - rowCntPerPage +1} and RNUM&lt;=${selectPageNo * rowCntPerPage}
+    		
+	</select>
+	
+	<sql id="CorpOrderHeaderSort">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null or sort.length() == 0">
+			order by order_dt desc
+		</if>
+	</sql>
+	
+	<sql id="CorpCondition">
+		<if test="searchKeyword !=null">
+				and (
+					upper(order_books_no) like upper('%${searchKeyword}%') 
+					or upper(corp_no) like upper('%${searchKeyword}%')
+					or upper(books_qty) like upper('%${searchKeyword}%')
+					or upper(corp_name) like upper('%${searchKeyword}%')
+					or upper(books_qty) like upper('%${searchKeyword}%')
+					or upper(order_dt) like upper('%${searchKeyword}%')
+				)			
+		</if>
+	</sql>
+	
+	<sql id="issueYnWhere">
+		<if test="issueYn != null">
+		and 1=1
+			<if test="issueYn.equals('y,')">
+				and issue = 1	
+			</if>
+			<if test="issueYn.equals('n,')">
+				and issue = 0	
+			</if>
+			
+		</if>	
+	</sql>
+	
+	<select id='getTranSpecCnt' parameterType = "int" resultType="int">
+		select count(*) from corp_order_info where order_books_no = #{order_books_no}
+		
+	</select>
+	
+	<select id="getTranSpecList" parameterType="int" resultType="com.group4.erp.TranSpecDTO">
+		select 
+    		co.order_books_no "order_books_no",  
+    		co.corp_no "corp_no",  
+    		(select c.corp_name from corporation_cus c where c.corp_no = co.corp_no) "corp_name",   
+    		(select c.ceo_name from corporation_cus c where c.corp_no = co.corp_no) "ceo_name",   
+    		(select c.corp_tel from corporation_cus c where c.corp_no = co.corp_no) "corp_tel",
+    		(select c.corp_fax from corporation_cus c where c.corp_no = co.corp_no) "corp_fax",              
+    		(select c.corp_addr from corporation_cus c where c.corp_no = co.corp_no) "corp_addr",
+    		co.isbn13 "isbn13",
+    		(select b.book_name from book b where b.isbn13=co.isbn13) "book_name",
+    		co.corp_no "corp_no",
+    		to_char((select b.book_price from book b where b.isbn13=co.isbn13),'999,999,999,999') "book_price",
+    		to_char(co.books_qty,'999,999,999') "books_qty",
+    		to_char(((select b.book_price from book b where b.isbn13=co.isbn13) * co.books_qty),'999,999,999,999') "tot_cost",
+    		((select b.book_price from book b where b.isbn13=co.isbn13) * co.books_qty)*0.1||'' "tax",
+    		to_char(co.order_dt, 'yyyy.mm.dd')|| '('||to_char(co.order_dt, 'dy', 'nls_date_language=Korean' )||')' "order_dt",
+    		((select b.book_price from book b where b.isbn13=co.isbn13) * co.books_qty) - (((select b.book_price from book b where b.isbn13=co.isbn13) * co.books_qty)*0.1) "tradeTot"
+
+    	from corp_order_info co
+    	where co.order_books_no = #{order_books_no}
+	</select>
+	
+	<select id="getTranSpecIssueCnt" resultType="int">
+		<!-- select count(*) from tran_issue_info where 1=1 -->
+		select count(*) from (
+        		select 
+					ti.issue_no "ISSUE_NO",
+					ti.order_no||'' "ORDER_NO",
+					ti.corp_no "CORP_NO",
+					(select c.corp_name from corporation_cus c where c.corp_no = ti.corp_no) "CORP_NAME",
+					(select c.ceo_name from corporation_cus c where c.corp_no = ti.corp_no) "CEO_NAME",
+					ti.order_dt "ORDER_DT",
+					to_char(ti.issue_dt, 'yyyy.mm.dd')|| '('||to_char(ti.issue_dt, 'dy', 'nls_date_language=Korean' )||')' "ISSUE_DT"
+				from tran_issue_info ti 
+			) where 1=1
+		<include refid="TranSpecIssueWhere" />
+	</select>
+	
+	
+	<select id="getTranSpecIssue" parameterType="com.group4.erp.TranSpecSearchDTO" resultType="com.group4.erp.TranSpecDTO">   
+	select * from (select zzz.*, rownum RNUM from (  
+        select
+            issue_no,
+            order_no,
+            corp_no,
+            corp_name,
+            ceo_name,
+            order_dt,
+            issue_dt
+            from (
+        		select 
+					ti.issue_no "ISSUE_NO",
+					ti.order_no||'' "ORDER_NO",
+					ti.corp_no "CORP_NO",
+					(select c.corp_name from corporation_cus c where c.corp_no = ti.corp_no) "CORP_NAME",
+					(select c.ceo_name from corporation_cus c where c.corp_no = ti.corp_no) "CEO_NAME",
+					ti.order_dt "ORDER_DT",
+					to_char(ti.issue_dt, 'yyyy.mm.dd')|| '('||to_char(ti.issue_dt, 'dy', 'nls_date_language=Korean' )||')' "ISSUE_DT"
+				from tran_issue_info ti 
+			)
+			where 1=1
+			<include refid="TranSpecIssueWhere" />
+			<include refid="headerSortTranIssue" />
+    )zzz) where RNUM&gt;= ${selectPageNo * rowCntPerPage - rowCntPerPage +1} and RNUM&lt;=${selectPageNo * rowCntPerPage}
+	</select>
+	
+	
+	<sql id="headerSortTranIssue">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null or sort.length() == 0">
+			order by 1 desc
+		</if>
+	</sql>
+	
+	
+	 <sql id="TranSpecIssueWhere">
+		<if test="searchKeyword !=null and searchKeyword.length() > 0">
+				and (
+					upper(issue_no) like upper('%${searchKeyword}%') 
+					or upper(corp_no) like upper('%${searchKeyword}%')
+					or upper(corp_name) like upper('%${searchKeyword}%')
+					or upper(ceo_name) like upper('%${searchKeyword}%')
+					or upper(order_dt) like upper('%${searchKeyword}%')
+					or upper(issue_dt) like upper('%${searchKeyword}%')
+				)			
+		</if>
+	</sql>
+	
+	
+	
+	<insert id="saveTempTranSpec" parameterType="com.group4.erp.TranSpecDTO">
+		insert into tran_issue_info (
+			issue_no,
+			order_no,
+			corp_no,
+			order_dt,
+			issue_dt,
+			issue_stat_cd
+		) values (
+			(select extract(year from sysdate)||to_char(nvl(count(*),0)+1, '00000') from tran_issue_info),
+			#{order_no},
+			(select oi.corp_no from corp_order_info oi where oi.order_books_no = #{order_no} ),
+			(select oi.order_dt from corp_order_info oi where oi.order_books_no = #{order_no} ),
+			sysdate,
+			'00'
+		)
+	</insert>
+	
+	<select id="getBusiness_area" resultType="com.group4.erp.CorporationDTO">
+		select
+			business_area_code||'' "bus_area_code",
+			business_area_name "bus_area_name"
+		from code_business_area
+	</select>
+	
+	<update id="updateCorpInfo" parameterType="com.group4.erp.CorporationDTO">
+		
+			update corporation_cus set 
+				corp_no = #{new_corp_no},
+				corp_name = #{corp_name},
+				ceo_name = #{ceo_name},
+				corp_addr = #{corp_addr},
+				corp_fax = #{corp_fax},
+				corp_tel = #{corp_tel},
+				corp_business_area = #{corp_business_area},
+				is_on_business='y'
+			where corp_no = #{corp_no}
+	</update>
+	
+	<select id="getSearchCorpCnt" parameterType="String" resultType="int">
+	
+		select count(*) from corporation_cus
+		where corp_no=#{corp_no}
+		
+	</select>
+	
+	
+		
+	<insert id="payCheckProc">
+		insert into state_of_payment (
+			emp_no, 
+			salary_dt, 
+			real_sal, 
+			month_sal, 
+			mess_allowance, 
+			bus_trip_bonus, 
+			sum_payable, 
+			pension, 
+			health, 
+			emp_insurance, 
+			deduct)
+		select e.emp_no||'' "emp_no", 
+    		sysdate "salary_dt", 
+    		(round( (e.salary*10000)/12, -2) + ( (select count(*) from work_outside_info where to_number(outside_end_time - outside_start_time) >=1 ) * 10000) + 100000 ) - ( round( (e.salary*10000)/12, -5) * 0.045 + round( (e.salary*10000)/12, -5) * 0.0323 + round( (e.salary*10000)/12, -5) * 0.008 ) "real_sal",
+    		round( (e.salary*10000)/12, -2)||'' "month_sal",
+    		(select 100000 from dual) "mess_allowance",
+    		nvl((select count(*) from work_outside_info w where to_number(w.outside_end_time - w.outside_start_time) >=1 and w.emp_no = e.emp_no and w.outside_start_time between (sysdate-30) and sysdate) * 10000, 0) "bus_trip_bonus",
+    		round( (e.salary*10000)/12, -2) + ( (select count(*) from work_outside_info where to_number(outside_end_time - outside_start_time) >=1 ) * 10000) + (select 100000 from dual)  "sum_payable",
+    		round( (e.salary*10000)/12, -5) * 0.045 "pension",
+    		round( (e.salary*10000)/12, -5) * 0.0323 "health", 
+    		round( (e.salary*10000)/12, -5) * 0.008 "emp_insurance",
+    		round( (e.salary*10000)/12, -5) * 0.045 + round( (e.salary*10000)/12, -5) * 0.0323 + round( (e.salary*10000)/12, -5) * 0.008 "deduct"
+    	from employee e     
+	</insert>
+	
+
+</mapper>

@@ -1,0 +1,205 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.group4.erp.dao.WorkDAO">		
+	<sql id="WorkSearchKey">
+	
+		<if test="startTime!=null and !startTime.isEmpty()">
+			 and to_char(w.outside_start_time,'yyyy-mm-dd') >= #{startTime} 
+		</if>
+		<if test="endTime!=null and !endTime.isEmpty() ">
+			<![CDATA[ and to_char(w.outside_end_time,'yyyy-mm-dd') <= #{endTime}]]>
+		</if>
+		<if test="payment!=null and payment.length > 0"> 
+			and travel_payment in
+			<foreach collection="payment" item="paymentArray" open="(" separator="," close=")">
+					#{paymentArray}
+			</foreach>
+		</if>
+			<if test="searchKey!=null and !searchKey.isEmpty()">
+     			<if test="keyword!= null and !keyword.isEmpty()">
+					<if test ="searchKey.equals('jikup')">
+						and c.jikup like '%'||#{keyword}||'%'
+					</if>
+					<if test ="searchKey.equals('emp_name')">
+						and e1.emp_name like '%'||#{keyword}||'%'
+					</if>
+					<if test ="searchKey.equals('dep_name')">
+						and d.dep_name like '%'||#{keyword}||'%'
+					</if>
+					<if test ="searchKey.equals('destination')">
+						and w.destination like '%'||#{keyword}||'%'
+					</if>
+					
+					<if test ="searchKey.equals('mgr_name')">
+						and e2.emp_name like '%'||#{keyword}||'%'
+					</if>
+     			</if>
+     		</if>
+     	 <if test="sort!='outside_start_time' and sort.length()>0">
+	     	order by ${sort}
+		 </if>
+     	 <if test="sort.equals('outside_start_time') and sort.length()>0">
+	     	order by ${sort}
+		 </if>
+	</sql>
+	
+
+	 <select id='getbusinessTripListAllCnt' resultType="int">
+		select count(*) from (
+			select
+				w.work_outside_seq	   as "work_outside_seq"
+				,e1.emp_no			   as "emp_no"
+	    		,c.jikup               as "jikup"
+	    		,e1.emp_name           as "emp_name"
+                ,e1.mgr_emp_no         as "mgr_no"
+	    		,d.dep_name            as "dep_name"
+	    		,d.dep_no			   as "dep_no"
+	    		,w.destination         as "destination"
+	    		,w.work_outside_reason as "work_outside_reason"
+	    		,to_char(w.outside_start_time,'yyyy-mm-dd dy')  as "outside_start_time"
+	    		,to_char(w.outside_end_time,'yyyy-mm-dd')    as "outside_end_time"
+	    		,nvl(e2.emp_name,' ')  as "mgr_name"
+	    		,w.travel_payment		   as "travel_payment"
+	  			,c.jikup_cd			   as "jikup_cd"
+		    from work_outside_info w inner join employee e1 on w.emp_no=e1.emp_no
+		    	 inner join code_jikup c on c.jikup_cd=e1.jikup_cd
+		    	 inner join dept d on d.dep_no=e1.dep_no
+	     		 left outer join employee e2 on e2.emp_no=e1.mgr_emp_no 
+	     	where delete_yn = 'N'
+	     		<include refid="WorkSearchKey"/>
+	     	)
+			
+	</select>
+	
+	<select id="getBusinessTripList"  parameterType="com.group4.erp.BusinessTripSearchDTO" resultType="java.util.HashMap">
+		select * from(select zzz.*, rownum RNUM from(
+			select
+			w.work_outside_seq	   as "work_outside_seq"
+			,e1.emp_no			   as "emp_no"
+    		,c.jikup               as "jikup"
+    		,e1.emp_name           as "emp_name"
+            ,e1.mgr_emp_no         as "mgr_no"
+    		,d.dep_name            as "dep_name"
+	    	,d.dep_no			   as "dep_no"
+    		,w.destination         as "destination"
+    		,w.work_outside_reason as "work_outside_reason"
+    		,to_char(w.outside_start_time,'yyyy-mm-dd(dy)' ,'NLS_DATE_LANGUAGE=KOREAN')  as "outside_start_time"
+    		,to_char(w.outside_end_time,'yyyy-mm-dd(dy)' ,'NLS_DATE_LANGUAGE=KOREAN')    as "outside_end_time"
+    		,nvl(e2.emp_name,' ')  as "mgr_name"
+    		,w.travel_payment	   as "travel_payment"
+  			,c.jikup_cd			   as "jikup_cd"
+  			,delete_yn			   as "delete_yn"
+	    from work_outside_info w inner join employee e1 on w.emp_no=e1.emp_no
+	    	 inner join code_jikup c on c.jikup_cd=e1.jikup_cd
+	    	 inner join dept d on d.dep_no=e1.dep_no
+     		 left outer join employee e2 on e2.emp_no=e1.mgr_emp_no 
+     	 where delete_yn = 'N'
+     	 	<include refid="WorkSearchKey"/>
+     	 ) zzz )
+     	 where	1=1 
+     	 		and 
+     	 		<![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+     	 
+	</select>
+		
+	<select id="getBusinessTripDTO" parameterType="int" resultType="com.group4.erp.BusinessTripDTO">
+		select
+				<!-- w.work_outside_seq	   as "work_outside_seq"
+				,e1.emp_no			   as "emp_no"
+	    		,c.jikup               as "jikup"
+	    		,e1.emp_name           as "emp_name"
+	    		,d.dep_name            as "dep_name"
+	    		,w.destination         as "destination"
+	    		,w.work_outside_reason as "work_outside_reason"
+	    		,to_char(w.outside_start_time,'yyyy-mm-dd')  as "outside_start_time"
+	    		,to_char(w.outside_end_time,'yyyy-mm-dd')    as "outside_end_time"
+	    		,nvl(e2.emp_name,' ')  as "mgr_name"
+	  			,c.jikup_cd			   as "jikup_cd" -->
+	  			w.work_outside_seq	   as "work_outside_seq"
+				,e1.emp_no			   as "emp_no"
+	    		,c.jikup               as "jikup"
+	    		,e1.emp_name           as "emp_name"
+	            ,e1.mgr_emp_no         as "mgr_no"
+	    		,d.dep_name            as "dep_name"
+		    	,d.dep_no			   as "dep_no"
+	    		,w.destination         as "destination"
+	    		,w.work_outside_reason as "work_outside_reason"
+	    		,to_char(w.outside_start_time,'yyyy-mm-dd')  as "outside_start_time"
+	    		,to_char(w.outside_end_time,'yyyy-mm-dd')    as "outside_end_time"
+	    		,nvl(e2.emp_name,' ')  as "mgr_name"
+	    		,w.travel_payment	   as "travel_payment"
+	  			,c.jikup_cd			   as "jikup_cd"
+	  			,delete_yn			   as "delete_yn"
+		from work_outside_info w inner join employee e1 on w.emp_no=e1.emp_no
+	    	 inner join code_jikup c on c.jikup_cd=e1.jikup_cd
+	    	 inner join dept d on d.dep_no=e1.dep_no
+     		 left outer join employee e2 on e2.emp_no=e1.mgr_emp_no
+     	where delete_yn = 'N' and w.work_outside_seq=#{work_outside_seq}
+	</select>
+	
+	<insert id="insertBusinessTrip" parameterType="com.group4.erp.BusinessTripDTO">
+		 insert into work_outside_info(work_outside_seq
+		 								,emp_no
+		 								,destination
+		 								,work_outside_reason
+		 								,outside_start_time
+		 								,outside_end_time
+		 								,travel_payment
+		 								,delete_yn
+		 								)
+   				values( WORK_OUTSIDE_INFO_SEQ.NEXTVAL
+   				 		,#{emp_no}
+   				 		,#{destination}
+   				 		,#{work_outside_reason}
+   				 		,#{outside_start_time}
+   				 		,#{outside_end_time}
+   				 		,'W'
+   				 		,'N'
+   				 )
+	</insert>
+	 
+	<update id="deleteBusinessTrip" parameterType="com.group4.erp.BusinessTripDTO">
+		update work_outside_info set delete_yn= 'Y' where work_outside_seq=#{work_outside_seq}
+	</update>
+	
+	<update id="updateBusinessTrip" parameterType="com.group4.erp.BusinessTripDTO">
+		update work_outside_info set destination=#{destination}
+									, work_outside_reason=#{work_outside_reason}
+									, outside_start_time=#{outside_start_time}
+									, outside_end_time=#{outside_end_time}
+								where work_outside_seq=#{work_outside_seq}
+	</update>
+	
+	<update id="approvedBusinessTrip" parameterType="com.group4.erp.BusinessTripDTO">
+		update work_outside_info set travel_payment= 'Y'
+												where work_outside_seq=#{work_outside_seq}
+	</update>
+	
+	
+	<select id="searchMyBTripApplyNo" parameterType="com.group4.erp.BusinessTripDTO" resultType="String">
+		select work_outside_seq from work_outside_info
+		where 1=1
+		and emp_no=#{emp_no}
+		and outside_start_time=#{outside_start_time}
+		and outside_end_time=#{outside_end_time}
+		and travel_payment='W' 
+	</select>
+	
+	<select id="getMyBTripApproval" parameterType="int" resultType="com.group4.erp.BusinessTripDTO">
+		select
+			wi.work_outside_seq "work_outside_seq",
+			wi.emp_no "emp_no",
+			(select e.emp_name from employee e where e.emp_no = wi.emp_no) "emp_name",
+            (select c.jikup from code_jikup c where c.jikup_cd = (select e.jikup_cd from employee e where e.emp_no=wi.emp_no) ) "jikup",
+			wi.destination "destination",
+			wi.work_outside_reason "work_outside_reason",
+			to_char(wi.outside_start_time, 'yyyy.mm.dd(dy)', 'NLS_DATE_LANGUAGE=KOREAN') "outside_start_time",
+			to_char(wi.outside_end_time, 'yyyy.mm.dd(dy)', 'NLS_DATE_LANGUAGE=KOREAN') "outside_end_time",
+			wi.travel_payment "travel_payment",
+			wi.delete_yn "delete_yn"
+		from work_outside_info wi
+		where wi.work_outside_seq = #{work_outside_seq}
+	
+	</select>
+	
+</mapper>

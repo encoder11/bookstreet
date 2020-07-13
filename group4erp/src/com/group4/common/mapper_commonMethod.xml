@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+   <!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+   <!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+
+<mapper namespace="com.group4.common.dao.commet">
+
+	<select id="getLocList"  resultType="java.util.HashMap">
+		select branch_name as "branch_name" from code_branch
+	</select>
+	
+	<select id="getBrchList"  resultType="java.util.HashMap">
+		select branch_name as "branch" from code_branch
+	</select>
+	
+	<select id="getPublcList" resultType="java.util.HashMap">
+		select distinct publisher as "publisher" from book order by 1 asc
+	</select>
+	
+	<select id="getSizeList" resultType="java.util.HashMap">
+		select 
+			size_cd as "size_cd",
+			size_name as "size_name" from code_book_size order by 1
+	</select>
+	
+	<select id="getCatList" resultType="java.util.HashMap">
+		select 
+			cat_cd "cat_cd",
+			cat_name as "cat_name" from code_category order by 1
+	</select>
+	
+</mapper>
+
+

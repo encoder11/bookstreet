@@ -1,0 +1,576 @@
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+	<!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.HrDAO">
+	<!-- 로그인 아이디, 암호의 존재 개수를 검색하는 select문을 내포한 <select> 태그 선언 -->
+	<!-- 
+		* <select> 태그 속성 설명
+		id="getAdminCnt" ==> SQL 구문의 고유 아이디값 설정. DAO 클래스의 메소드 이름과 동일
+		parameterType="hashmap" ==> SQL 구문에 삽입될 외부 데이터의 자료형 설정
+		resultType="int" ==> SQL 구문의 실행 후 리턴값 자료형 설정
+		
+		* SQL 구문 안의 #{HashMap객체키값명} 설명
+		키값에 대응하는 데이터가 문자열을 삽입하라는 뜻이다. 만약 문자면 ''(싱글쿼트)로 감싸 삽입하고 아니면 그대로 삽입한다.
+		
+		* SQL 구문 안의 #{HashMap객체키값명} 설명
+		키값에 대응하는 데이터의 종류에 관계없이 데이터를 그대로 삽입
+	
+	 -->  
+	 
+	 <sql id='inout'>
+	 	<if test="(datepicker != null and datepicker.length()>0)">
+	 		and
+	 		 ( eio.dt_work = to_date( #{datepicker}, 'YYYY-MM-DD') )
+	 	</if>
+	 	<if test="keyword1!=null and keyword1.length()>0 ">
+			<!--틀린 코드 :  <if test="keyword1!=null and keyword1.length()>0 and ( keyword2==null or keyword2.length()==0 )"> -->
+				and(
+					upper(to_char(eio.dt_work, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN')) like upper('%${keyword1}%')
+					or upper(eio.emp_no) like upper('%${keyword1}%')
+					or upper((select e.emp_name from employee e where eio.emp_no = e.emp_no)) like upper('%${keyword1}%')
+					or upper((select d.dep_name from dept d, employee e where e.emp_no = eio.emp_no and d.dep_no = e.dep_no)) like upper('%${keyword1}%')
+					or upper((select j.jikup from code_jikup j, employee e where e.jikup_cd = j.jikup_cd and e.emp_no = eio.emp_no)) like upper('%${keyword1}%')
+					or upper(to_char(eio.in_time, 'HH24:MI')) like upper('%${keyword1}%')
+					or upper(to_char(eio.out_time, 'HH24:MI')) like upper('%${keyword1}%')	
+					or upper(to_number(to_char(eio.out_time, 'HH24'))- to_number(to_char(eio.in_time, 'HH24'))||'시간') like upper('%${keyword1}%')		
+					or upper( (select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd) ) like upper('%${keyword1}%')
+					or upper(eio.remarks) like upper('%${keyword1}%')
+				)
+		</if>
+		<if test="inout_name!=null and inout_name.length>0 ">
+			and 
+			<foreach collection="inout_name" item="inout" open="(" separator="or" close=")">
+             	<if test="inout.equals('출근')">
+					(select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd)=#{inout}
+				</if>
+             	<if test="inout.equals('퇴근')">
+					(select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd)=#{inout}
+				</if>
+             	<if test="inout.equals('결근')">
+					(select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd)=#{inout}
+				</if>
+             	<if test="inout.equals('조퇴')">
+					(select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd)=#{inout}
+				</if>
+             	<if test="inout.equals('지각')">
+					(select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd)=#{inout}
+				</if>
+             	<if test="inout.equals('외근')">
+					(select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd)=#{inout}
+				</if>
+			</foreach>
+		</if>
+	 </sql>
+	 
+	 <!-- dayoff_list where 검색 조건 설정 -->
+	 <sql id='dayoffWhere'>
+	 	<if test="dy_keyword!=null and dy_keyword.length()>0 ">
+			<!--틀린 코드 :  <if test="keyword1!=null and keyword1.length()>0 and ( keyword2==null or keyword2.length()==0 )"> -->
+				and(
+					upper(dayoff_apply_no) like upper('%${dy_keyword}%')
+					or upper((select d.dep_name from dept d, employee e where da.emp_no = e.emp_no and d.dep_no = e.dep_no)) like upper('%${dy_keyword}%')
+					or upper((select j.jikup from code_jikup j, employee e where e.jikup_cd = j.jikup_cd and e.emp_no = da.emp_no)) like upper('%${dy_keyword}%')
+					
+					or upper((select e.emp_name from employee e where da.emp_no = e.emp_no)) like upper('%${dy_keyword}%')
+					or upper((select cd.dayoff_name from code_dayoff cd where da.dayoff_cd = cd.dayoff_cd )) like upper('%${dy_keyword}%')
+					
+					or upper(to_char(da.start_dayoff, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN')) like upper('%${dy_keyword}%')
+					or upper(to_char(da.end_dayoff, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN')) like upper('%${dy_keyword}%')
+					
+					or upper(da.using_dayoff) like upper('%${dy_keyword}%')	
+					<!-- or upper((select remain_dayoff from emp_dayoff_info where emp_no = da.emp_no)) like upper('%${dy_keyword}%')		
+					or upper((select dayoff_tot from emp_dayoff_info where emp_no = da.emp_no)) like upper('%${dy_keyword}%') -->
+					or upper(to_char(da.dayoff_apply_dt, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN')) like upper('%${dy_keyword}%')
+					or upper(decode(da.confirm, 'Y', '완료', 'N', '대기중')) like upper('%${dy_keyword}%')
+				    or upper(case when (da.start_dayoff &lt;= sysdate and sysdate &lt;= da.end_dayoff) then '휴가중' 
+					  when (da.start_dayoff &gt; sysdate and da.end_dayoff &gt; sysdate) then '휴가전'
+                      when (da.end_dayoff &lt; sysdate) then '휴가후' end) like upper('%${dy_keyword}%')
+				)
+		</if>
+		<if test="dayoff_state!=null and dayoff_state.length>0 ">
+			and
+			<foreach collection="dayoff_state" item="dy_state" open="(" separator="or" close=")">
+             	<if test="dy_state.equals('휴가전')">
+					(
+						case when (da.start_dayoff &lt;= sysdate and sysdate &lt;= da.end_dayoff) then '휴가중' 
+					  		 when (da.start_dayoff &gt; sysdate and da.end_dayoff &gt; sysdate) then '휴가전'
+                      		 when (da.end_dayoff &lt; sysdate) then '휴가후' 
+                      	end
+                     )=#{dy_state}
+				</if>
+             	<if test="dy_state.equals('휴가중')">
+					(case when (da.start_dayoff &lt;= sysdate and sysdate &lt;= da.end_dayoff)then '휴가중' 
+					  when (da.start_dayoff &gt; sysdate and da.end_dayoff &gt; sysdate) then '휴가전'
+                      when (da.end_dayoff &lt; sysdate) then '휴가후' end)=#{dy_state}
+				</if>
+             	<if test="dy_state.equals('휴가후')">
+					(case when (da.start_dayoff &lt;= sysdate and sysdate &lt;= da.end_dayoff)then '휴가중' 
+					  when (da.start_dayoff &gt; sysdate and da.end_dayoff &gt; sysdate) then '휴가전'
+                      when (da.end_dayoff &lt; sysdate) then '휴가후' end)=#{dy_state}
+				</if>
+			</foreach>
+		</if>
+	</sql>
+	
+	
+	
+
+	 <sql id="empListWhere">
+	 	<if test="(searchKeyword!=null and searchKeyword.length()>0)">
+			and (
+              upper(emp_name) like upper('%${searchKeyword}%')
+              or upper(emp_eng_name) like upper('%${searchKeyword}%')
+              or upper(emp_no) like upper('%${searchKeyword}%')
+              <!-- or upper(hire_dt) like upper('%${searchKeyword}%') -->
+              or upper(emp_email_office) like upper('%${searchKeyword}%')
+              or upper((select d.dep_name from dept d where d.dep_no=e.dep_no)) like upper('%${searchKeyword}%')
+              or upper((select j.jikup from code_jikup j where j.jikup_cd=e.jikup_cd)) like upper('%${searchKeyword}%')
+              or upper((select c.worktime_name from code_worktime c where e.worktime_cd = c.worktime_cd)) like upper('%${searchKeyword}%')
+           	)
+		</if>
+	 </sql>
+
+	 <sql id="headerSort">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null">
+			order by 1
+		</if>
+	</sql>
+	
+	 <sql id="empSalWhere">
+	 	<if test="searchKeyword!=null and searchKeyword.length()>0">
+			and (
+              upper(emp_name) like upper('%${searchKeyword}%')            
+              or upper((select j.jikup from code_jikup j where j.jikup_cd=e.jikup_cd)) like upper('%${searchKeyword}%')
+           	)
+		</if>
+		<if test="emp_no != null">
+			and (
+				e.emp_no = #{emp_no}
+			)
+			
+		</if>
+	 </sql>
+
+	<select id='getEmpListCnt' resultType="int">
+		select count(*) from employee e where 1=1 <include refid="empListWhere" />
+	</select>
+	
+	<select id='getEmpList' parameterType="com.group4.erp.HrListSearchDTO" resultType="java.util.HashMap">
+		select * from(select zzz.*, rownum RNUM from(
+			select
+				emp_no||'' 					as "emp_no"
+				,emp_name 					as "emp_name"
+				,(select d.dep_name from dept d where d.dep_no=e.dep_no) as "dep_name"
+				,(select j.jikup from code_jikup j where j.jikup_cd=e.jikup_cd) as "jikup"
+				,to_char(hire_dt, 'yyyy.mm.dd(dy)', 'nls_date_language=Korean') "hire_dt"
+				,emp_email_office "emp_email_office"
+				,(select c.worktime_name from code_worktime c where e.worktime_cd = c.worktime_cd) as "worktime_name"
+			from employee e	
+			where 1=1
+			<include refid="empListWhere" />
+			<if test="sort!=null and sort.length()>0">
+	 			order by ${sort}
+	 		</if>
+	 		<if test="sort==null or sort.length()==0">
+	 			order by emp_no asc
+	 		</if>
+			
+		) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+
+
+	</select>
+	
+	<select id='getEmpSalList' parameterType="com.group4.erp.SalListSearchDTO" resultType="com.group4.erp.SalaryDTO">
+	
+	select * from(select zzz.*, rownum RNUM from(
+		select 
+        	e.emp_no||'' "emp_no",
+        	(select j.jikup from code_jikup j where j.jikup_cd = (select ee.jikup_cd from employee ee where ee.emp_no=e.emp_no) ) "jikup",
+           	e.emp_name "emp_name",
+       	 	e.salary*10000||'' "salary",
+        	round( (e.salary*10000)/12, -2)||'' "month_sal",
+        	(select 100000 from dual) "mess_allowance",
+        	(select count(*) from work_outside_info w where to_number(w.outside_end_time - w.outside_start_time) >=1 and w.emp_no = e.emp_no and w.outside_start_time between (sysdate-30) and sysdate ) "bus_trip_cnt",
+        	nvl((select count(*) from work_outside_info w where to_number(w.outside_end_time - w.outside_start_time) >=1 and w.emp_no = e.emp_no and w.outside_start_time between (sysdate-30) and sysdate ) * 10000, 0) "bus_trip_bonus",
+        	round( (e.salary*10000)/12, -2) + ( (select count(*) from work_outside_info w where to_number(outside_end_time - outside_start_time) >=1  and w.emp_no = e.emp_no and w.outside_start_time between (sysdate-30) and sysdate ) * 10000) + (select 100000 from dual)  "sum_payable",
+        	round( (e.salary*10000)/12, -5) * 0.045 "pension",
+        	round( (e.salary*10000)/12, -5) * 0.0323 "health", 
+        	round( (e.salary*10000)/12, -5) * 0.008 "emp_insurance",
+        	round( (e.salary*10000)/12, -5) * 0.045 + round( (e.salary*10000)/12, -5) * 0.0323 + round( (e.salary*10000)/12, -5) * 0.008 "deduct",
+        	(round( (e.salary*10000)/12, -2) + ( (select count(*) from work_outside_info w where to_number(outside_end_time - outside_start_time) >=1 and w.emp_no = e.emp_no and w.outside_start_time between (sysdate-30) and sysdate ) * 10000) + 100000 ) - ( round( (e.salary*10000)/12, -5) * 0.045 + round( (e.salary*10000)/12, -5) * 0.0323 + round( (e.salary*10000)/12, -5) * 0.008 ) "real_sal"  
+        from employee e  
+    	where 1=1
+    	and worktime_cd != 6
+    	order by e.emp_no asc
+	) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+	
+	</select>
+	
+	<select id='getEmpSalInfo' parameterType="com.group4.erp.SalListSearchDTO" resultType="com.group4.erp.SalaryDTO">
+	select * from(select zzz.*, rownum RNUM from(
+		select 
+			to_char(salary_dt, 'yyyy.mm.dd')|| '('||to_char(salary_dt, 'dy', 'nls_date_language=Korean' )||')' "salary_dt",
+			emp_no "emp_no",
+<!-- 
+			to_char(real_sal,'999,999,999,999')||'원' "real_sal",
+			to_char(month_sal,'999,999,999,999')||'원' "month_sal",
+			to_char(mess_allowance,'999,999,999,999')||'원' "mess_allowance",
+			to_char(bus_trip_bonus,'999,999,999,999')||'원' "bonus",
+			to_char(sum_payable,'999,999,999,999')||'원' "sum_payable",
+			to_char(pension,'999,999,999,999')||'원' "pension",
+			to_char(health,'999,999,999,999')||'원' "health",
+			to_char(emp_insurance,'999,999,999,999')||'원' "emp_insurance",
+			to_char(deduct,'999,999,999,999')||'원' "deduct" -->
+
+			real_sal "real_sal",
+			month_sal "month_sal",
+			mess_allowance "mess_allowance",
+			bus_trip_bonus "bonus",
+			sum_payable "sum_payable",
+			pension "pension",
+			health "health",
+			emp_insurance "emp_insurance",
+			deduct "deduct"
+		from state_of_payment			  
+    	where 1=1
+    	and emp_no = '${emp_no}'  
+    	<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		<if test="sort==null">
+			order by salary_dt desc
+		</if>
+    	
+    ) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+	</select>
+	
+	<select id="getMyPayCheckCnt" parameterType="int" resultType="int">
+		select count(*) from state_of_payment
+		where emp_no=#{emp_no}
+	</select>
+
+	<select id='getAvgSalChart' resultType="com.group4.erp.SalaryDTO">
+		select         
+            (select c.jikup from code_jikup c where c.jikup_cd = e.jikup_cd) "jikup",
+            trunc(avg(salary), 1) "avg_salary"
+        from employee e   
+        group by e.jikup_cd
+        order by e.jikup_cd
+	</select>
+	
+	
+	<select id='getTime' resultType="com.group4.erp.TimeDTO">
+
+		select extract(year from sysdate) as "now_year", 
+		extract(month from sysdate) as "now_month" 
+		from dual
+
+	</select>
+
+	
+	<select id='getDayOffListCnt' resultType="int">
+		select count(*) from EMP_DAYOFF_APPLY da where 1=1 and da.confirm in ('Y', 'N') <include refid="dayoffWhere" />	
+	</select>
+	
+	
+	
+	<select id='getDayOffList' resultType="java.util.HashMap"> 
+	select * from (select zzz.*, rownum RNUM from(	
+		select
+			da.emp_no||'' as "emp_no"
+			,dayoff_apply_no||'' as "dayoff_apply_no"
+		    ,(select d.dep_name from dept d, employee e where da.emp_no = e.emp_no and d.dep_no = e.dep_no) as "dep_name"
+		    ,(select j.jikup from code_jikup j, employee e where e.jikup_cd = j.jikup_cd and e.emp_no = da.emp_no) as "jikup"
+		    ,(select e.emp_name from employee e where da.emp_no = e.emp_no) as "emp_name"
+		    ,(select cd.dayoff_name from code_dayoff cd where da.dayoff_cd = cd.dayoff_cd ) as "dayoff_name"
+		    ,to_char(da.start_dayoff, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') as "start_dayoff"
+		    ,to_char(da.end_dayoff, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') as "end_dayoff"
+		    ,da.using_dayoff||'' as "using_dayoff"
+		    ,(select i.remain_dayoff from emp_dayoff_info i where i.emp_no = da.emp_no)||'' as "remain_dayoff"
+		    ,(select i.dayoff_tot from emp_dayoff_info i where i.emp_no = da.emp_no)||'' as "dayoff_tot"
+			,to_char(da.dayoff_apply_dt, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') as "dayoff_apply_dt"
+			,decode(da.confirm, 'Y', '완료', 'N', '대기중') as "confirm"
+            ,case
+                when (da.start_dayoff &lt;= sysdate and sysdate &lt;= da.end_dayoff)
+                then '휴가중'
+                when (da.start_dayoff &gt; sysdate and da.end_dayoff &gt; sysdate)
+                then '휴가전'
+                when (da.end_dayoff &lt; sysdate)
+                then '휴가후'
+            end as "dayoffState"
+		from EMP_DAYOFF_APPLY da
+		where 1=1 
+		and da.confirm in ('Y', 'N')
+		<include refid="dayoffWhere" />
+		<if test="sort!=null and sort.length()>0">
+ 			order by ${sort}
+ 		</if>
+ 		<if test="sort==null or sort.length()==0">
+ 			order by da.start_dayoff desc
+ 		</if>
+		
+	) zzz ) where <![CDATA[RNUM >= ${selectPageNo * rowCntPerPage - rowCntPerPage + 1} and RNUM <= ${selectPageNo * rowCntPerPage} ]]>
+	</select>
+	
+	
+	<update id="updateDayOffApprovalProc" parameterType="com.group4.erp.ApprovalDTO">
+		update emp_dayoff_apply set
+		confirm = #{confirm}
+		where dayoff_apply_no=#{doc_no}
+	</update>
+
+	
+	<update id="dayoffUpdateProcI" parameterType="com.group4.erp.HrDayoffDTO">
+		update EMP_DAYOFF_INFO
+		set remain_dayoff = remain_dayoff - (   (#{using_dayoff}) - ( select using_dayoff from EMP_DAYOFF_APPLY where emp_no = to_number(#{emp_no}) and dayoff_apply_no=to_number(#{dayoff_apply_no}) )   )
+		where emp_no = to_number(#{emp_no})
+	</update>
+	
+	<update id="dayoffUpdateProcII" parameterType="com.group4.erp.HrDayoffDTO">
+		update EMP_DAYOFF_APPLY 
+		<set>
+			<if test="dayoff_name!=null">dayoff_cd=(select dayoff_cd from code_dayoff where dayoff_name=#{dayoff_name})</if>      
+			<if test="start_dayoff!=null">,start_dayoff = to_date(#{start_dayoff},'YYYY-MM-DD')</if>
+			<if test="end_dayoff!=null">,end_dayoff = to_date(#{end_dayoff},'YYYY-MM-DD')</if>
+			<if test="using_dayoff!=null">,using_dayoff = ${using_dayoff}</if>
+		</set>
+		where emp_no = #{emp_no} 
+	</update>
+	
+
+	
+	<update id="dayoffDeleteProcI" parameterType="com.group4.erp.HrDayoffDTO">
+		update EMP_DAYOFF_INFO
+		set remain_dayoff = remain_dayoff + to_number(#{remain_dayoff})
+		where emp_no = to_number(#{emp_no})
+	</update>
+	<delete id="dayoffDeleteProcII" parameterType="com.group4.erp.HrDayoffDTO">
+		delete from EMP_DAYOFF_APPLY where emp_no = to_number(#{emp_no}) and dayoff_apply_dt=to_date(#{dayoff_apply_dt},'YYYY-MM-DD')
+	</delete>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	<select id='getEmpInoutListCnt' parameterType="com.group4.erp.HrListSearchDTO" resultType="int">
+		select count(*) from emp_inout eio 
+		where 1=1 <include refid="inout"></include>
+
+	</select>
+	
+	<!-- <select id='getEmpInoutList' resultType="java.util.HashMap"> 
+	
+	</select> -->
+
+
+	<select id='getEmpInoutList' parameterType="com.group4.erp.HrListSearchDTO" resultType="java.util.HashMap"> 
+	select * from (select zzz.*, rownum RNUM from(		
+		select
+		    to_char(eio.dt_work, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') as "DT_WORK"
+	        ,eio.emp_no||'' as  "EMP_NO"
+	        ,(select e.emp_name from employee e where eio.emp_no = e.emp_no) as "EMP_NAME"
+	        ,(select d.dep_name from dept d, employee e where e.emp_no = eio.emp_no and d.dep_no = e.dep_no) as "DEP_NAME"
+	        ,(select j.jikup from code_jikup j, employee e where e.jikup_cd = j.jikup_cd and e.emp_no = eio.emp_no)  as "JIKUP"
+	        ,to_char(eio.in_time, 'HH24:MI')    as "IN_TIME"
+	        ,to_char(eio.out_time, 'HH24:MI')   as "OUT_TIME"
+	        ,nvl((to_number( to_char(eio.out_time, 'HH24')) - to_number( to_char(eio.in_time, 'HH24'))),0)||'시간' as "WORKING_HRS"
+	        ,(select check_inout_name from code_check_inout where eio.check_inout_cd = check_inout_cd) as "CHECK_INOUT_NAME"
+	        ,eio.remarks as "REMARKS"
+		from emp_inout eio
+		where 1=1 
+		<include refid="inout"></include>
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null">
+			order by eio.dt_work desc
+		</if>
+	) zzz ) 
+	where <![CDATA[RNUM >= ${selectPageNo * rowCntPerPage - rowCntPerPage + 1} and RNUM <= ${selectPageNo * rowCntPerPage} ]]>
+	</select>
+	
+	
+	
+	<select id="getEmpContentList" parameterType="int" resultType="com.group4.erp.EmployeeInfoUpDTO">
+		select
+			emp_no		as		"emp_no"
+			,emp_name	as		"emp_name"
+			,emp_eng_name	as	"emp_eng_name"
+			,jumin_num		as	"jumin_num"
+			,phone			as	"phone"
+			,emp_email		as	"emp_email"
+			,emp_email_office	as	"emp_email_office"
+			,emp_addr		as	"emp_addr"
+			,to_char(hire_dt, 'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN')	as	"hire_dt"
+			,emp_resign_date as "resign_date"
+			,is_on_leave	as	"is_on_leave"
+			,emp_gender		as	"emp_gender"
+			,salary			as	"salary"
+			,emp_pic		as	"emp_pic"
+			,emp_pwd 			as 	"emp_pwd"
+			,(select d.dep_name from dept d where e1.dep_no=d.dep_no)	as	"dep_name"
+			,(select w.worktime_name from code_worktime w where e1.worktime_cd=w.worktime_cd)	as	"worktime_name"
+			,(select j.jikup from code_jikup j where j.jikup_cd=e1.jikup_cd)		as		"jikup"
+			,(select jikup from code_jikup where jikup_cd=(select jikup_cd from employee where emp_no=(select mgr_emp_no from employee where emp_no=#{emp_no})))	as	"mgr_emp_jikup"
+			,(select dep_name from dept where dep_no=(select dep_no from employee where emp_no=(select mgr_emp_no from employee where emp_no=#{emp_no})))		as		"mgr_emp_dep_name"
+			,(select e2.emp_name from employee e2 where e2.emp_no=e1.mgr_emp_no)		as		"mgr_emp_name"
+			from employee e1
+			where 1=1 and emp_no=#{emp_no}
+	</select>
+	
+	<insert id="getNewEmpInsert" parameterType="com.group4.erp.EmployeeDTO">
+		insert into employee (emp_no, emp_name, emp_eng_name, jumin_num, emp_gender, phone, emp_email, emp_addr, worktime_cd, emp_pic ,emp_pwd
+		) values (
+		(select nvl(max(emp_no), 0)+1 from employee where worktime_cd=6)
+		,'${emp_name}'
+		,'${emp_eng_name}'
+		,'${jumin_num}'
+		,'${emp_gender}'
+		,'${phone}'
+		,'${emp_email}'
+		,'${emp_addr}'
+		,6
+		,#{emp_pic}
+		,'${emp_pwd}'
+		)
+	</insert>
+	<!-- ,(select emp_no from employee where jikup_cd=4 and dep_no=#{dep_no})  -->
+	
+	
+	<update id="empInfoUpProc" parameterType="com.group4.erp.EmployeeInfoUpDTO">
+		update employee 
+		<set>
+			<if test="emp_no!=null">emp_no=to_number(#{emp_no})</if>
+			<if test="emp_name!=null">,emp_name=#{emp_name}</if>
+			<if test="emp_eng_name!=null">,emp_eng_name=#{emp_eng_name}</if>
+			<if test="emp_pwd!=null">,emp_pwd = #{emp_pwd}</if>
+			<if test="emp_gender!=null">,emp_gender=#{emp_gender}</if>
+			<if test="jumin_num!=null">,jumin_num=#{jumin_num}</if>
+			<if test="phone!=null">,phone=#{phone}</if>
+			<if test="emp_email_office!=null">,emp_email_office=#{emp_email_office}</if>
+			<if test="emp_email!=null">,emp_email=#{emp_email}</if>
+			<if test="emp_addr!=null">,emp_addr=#{emp_addr}</if>
+			<if test="jikup!=null">,jikup_cd=(select jikup_cd from code_jikup where jikup=#{jikup})</if>
+			<if test="worktime_name!=null">,worktime_cd = (select worktime_cd from CODE_WORKTIME where worktime_name=#{worktime_name})</if>
+			<if test="dep_name!=null">,dep_no=(select dep_no from dept where dep_name=#{dep_name})</if>
+			<if test="salary!=null">,salary=#{salary}</if>
+			<if test="resign_date!=null">,emp_resign_date=to_date(#{resign_date}, 'YYYY-MM-DD')</if>
+			<if test="emp_pic!=null">,emp_pic=#{emp_pic}</if>
+		</set>
+		where emp_no = to_number(#{emp_no})
+	</update>
+	
+	
+<!-- 			update employee 
+		set 
+			emp_no = to_number(#{emp_no})
+			,emp_name=#{emp_name}
+			,emp_eng_name=#{emp_eng_name}
+			,emp_pwd = #{emp_pwd}
+			,emp_gender=#{emp_gender}
+			,jumin_num=#{jumin_num}
+			,phone=#{phone}
+			,emp_email_office=#{emp_email_office}
+			,emp_email=#{emp_email}
+			,emp_addr=#{emp_addr}
+			,jikup_cd=(select jikup_cd from code_jikup where jikup=#{jikup})
+			,worktime_cd = (select worktime_cd from CODE_WORKTIME where worktime_name=#{worktime_name})
+			,dep_no=(select dep_no from dept where dep_name=#{dep_name})
+			,salary=#{salary}
+			,emp_resign_date=to_date(#{resign_date}, 'YYYY-MM-DD')
+			,emp_pic=#{emp_pic}
+		where emp_no = to_number(#{emp_no})  -->
+	
+
+	<update id="newEmpConfirmProc" parameterType="com.group4.erp.EmployeeInfoUpDTO">
+		update employee 
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="emp_name!=null">emp_no = (select nvl(max(emp_no),0)+1 from employee where dep_no=(select dep_no from dept where dep_name=#{dep_name}))</if>
+			<if test="emp_name!=null">,emp_name=#{emp_name}</if>
+			<if test="emp_eng_name!=null">,emp_eng_name=#{emp_eng_name}</if>
+			<if test="emp_pwd!=null">,emp_pwd = #{emp_pwd}</if>
+			<if test="emp_gender!=null">,emp_gender=#{emp_gender}</if>
+			<if test="jumin_num!=null">,jumin_num=#{jumin_num}</if>
+			<if test="phone!=null">,phone=#{phone}</if>
+			<if test="emp_name != null">,emp_email_office=((select nvl(max(emp_no),0)+1||'@office.co.kr' from employee where dep_no=(select dep_no from dept where dep_name=#{dep_name})) )</if>
+			<if test="emp_email != null">,emp_email=#{emp_email}</if>
+			,mgr_emp_no = (select emp_no from employee where emp_no = (select emp_no from employee where dep_no = (select dep_no from dept where dep_name=#{dep_name}) and jikup_cd = 4))
+			<if test="emp_addr != null">,emp_addr=#{emp_addr}</if>
+			<if test="jikup != null">,jikup_cd=(select jikup_cd from code_jikup where jikup=#{jikup})</if>
+			<if test="worktime_name!= null">,worktime_cd = (select worktime_cd from CODE_WORKTIME where worktime_name=#{worktime_name})</if>
+			<if test="dep_name != null">,dep_no=(select dep_no from dept where dep_name=#{dep_name})</if>
+			<if test="salary != null">,salary=#{salary}</if>
+			<if test="resign_date != null">,emp_resign_date=to_date(#{resign_date}, 'YYYY-MM-DD')</if>
+			<if test="emp_pic != null">,emp_pic=#{emp_pic}</if>
+		</trim>
+		where emp_no = to_number(#{emp_no})
+	</update>
+	
+	<insert id="getAddDayoffinfo" parameterType="com.group4.erp.EmployeeInfoUpDTO">
+		insert into emp_dayoff_info
+		values (
+			(select emp_no from employee where jumin_num=#{jumin_num})
+			,15
+			,15
+		)
+	</insert>
+		
+	<!-- 	set 
+			emp_no = (select nvl(max(emp_no),0)+1 from employee where dep_no=(select dep_no from dept where dep_name=#{dep_name}))
+			,emp_name=#{emp_name}
+			,emp_eng_name=#{emp_eng_name}
+			,emp_pwd = #{emp_pwd}
+			,emp_gender=#{emp_gender}
+			,jumin_num=#{jumin_num}
+			,phone=#{phone}
+			,emp_email_office=((select nvl(max(emp_no),0)+1 from employee where dep_no=(select dep_no from dept where dep_name=#{dep_name})) ||'@office.co.kr'   )
+			,emp_email=#{emp_email}
+			,emp_addr=#{emp_addr}
+			,jikup_cd=(select jikup_cd from code_jikup where jikup=#{jikup})
+			,worktime_cd = (select worktime_cd from CODE_WORKTIME where worktime_name=#{worktime_name})
+			,dep_no=(select dep_no from dept where dep_name=#{dep_name})
+			,salary=#{salary}
+			,emp_resign_date=to_date(#{resign_date}, 'YYYY-MM-DD')
+			<c:if test="emp_pic!=null and emp_pic.length()>0">
+				,emp_pic=#{emp_pic}
+			</c:if>
+		where emp_no = to_number(#{emp_no})  
+	</update>-->
+
+	<update id='getUpdateCnt' parameterType="hashmap">
+		update emp_inout 
+        set emp_no = to_number(${emp_no})
+            ,check_inout_cd = (select check_inout_cd from code_check_inout where check_inout_name = '${check_inout_name}')
+            ,in_time = to_date('${in_time}', 'HH24MI')
+            ,out_time = to_date('${out_time}', 'HH24MI')
+            ,working_hr = (to_date('${out_time}','hh24mi')-to_date('${in_time}','hh24mi'))*24
+            ,remarks = '${remarks}'
+        where emp_no = to_number(${emp_no}) and dt_work = to_date('${dt_work}','yyyy-mm-dd')
+	</update>
+	
+<!-- 	<select id="getEmpNoEmpPic" parameterType="com.group4.erp.EmployeeInfoUpDTO" resultType="com.group4.erp.EmployeeInfoUpDTO">
+		select
+			emp_no		as		"emp_no"
+			,emp_pic		as	"emp_pic"
+		from employee 
+		where 1=1 and emp_no=to_number(#{emp_no})
+	</select> -->
+
+</mapper>

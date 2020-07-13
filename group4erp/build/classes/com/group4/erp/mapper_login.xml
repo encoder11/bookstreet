@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+   <!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+   <!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+
+<mapper namespace="com.group4.erp.dao.loginDAO">
+   <!-- 로그인 아이디, 암호의 존재 개수를 검색하는 select문을 내포한 <select> 태그 선언 -->
+   <!-- 
+      * <select> 태그 속성 설명
+      id="getAdminCnt" ==> SQL 구문의 고유 아이디값 설정. DAO 클래스의 메소드 이름과 동일
+      parameterType="hashmap" ==> SQL 구문에 삽입될 외부 데이터의 자료형 설정
+      resultType="int" ==> SQL 구문의 실행 후 리턴값 자료형 설정
+      
+      * SQL 구문 안의 #{HashMap객체키값명} 설명
+      키값에 대응하는 데이터가 문자열을 삽입하라는 뜻이다. 만약 문자면 ''(싱글쿼트)로 감싸 삽입하고 아니면 그대로 삽입한다.
+      
+      * SQL 구문 안의 #{HashMap객체키값명} 설명
+      키값에 대응하는 데이터의 종류에 관계없이 데이터를 그대로 삽입
+   
+    -->  
+   <select id='getEmpIdCnt' parameterType="hashmap" resultType="int">
+      select count(*) from employee where emp_no=#{emp_id} and emp_pwd=#{emp_pwd}
+   </select>
+   
+   <select id="getLoginEmpInfo" parameterType="String" resultType="com.group4.erp.EmployeeDTO">
+      select
+         e.emp_no||'' "emp_no",
+         e.emp_name "emp_name",
+         e.emp_eng_name "emp_eng_name",
+         e.dep_no||'' "dep_no",
+         (select d.dep_name from dept d where d.dep_no=e.dep_no) "dep_name",
+         e.jikup_cd "jikup_cd",
+         (select j.jikup from code_jikup j where j.jikup_cd=e.jikup_cd) "jikup",
+         e.hire_dt "hire_dt",
+         e.phone "phone",
+         e.emp_email "emp_email",
+         e.emp_email_office "emp_email_office",
+         e.mgr_emp_no "mgr_emp_no",
+         (select ee.emp_no from employee ee where ee.jikup_cd=1) "ceo_no",
+            (select ee.emp_name from employee ee where ee.jikup_cd=1) "ceo_name",
+         (select ee.emp_name from employee ee where e.mgr_emp_no = ee.emp_no) "mgr",
+         e.emp_addr "emp_addr"
+      from employee e
+      where 1=1
+      and e.emp_no=#{emp_id}
+   </select>
+   
+   <select id="getApprovalCheck" parameterType="String" resultType="com.group4.erp.EmpApprovalCheckDTO">
+      select emp_pwd, emp_no, worktime_cd from employee where jumin_num=#{jumin}
+   </select>
+   
+</mapper>
+
+

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+	<!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.cilent.dao.OrderBookDAO">
+	
+	
+	<select id="getBookCnt" parameterType="com.group4.client.BookOrderInsertDTO" resultType="int">
+		select isbn_cnt from stock_info where isbn13=#{isbn13}
+	</select>
+	
+	<select id="getCheckID" parameterType="com.group4.client.BookOrderInsertDTO" resultType="int">
+		select count(*) from customer where cus_id=#{cus_id} and cus_pwd=#{cus_pwd}
+	</select>
+
+	<!-- 
+	<update id="getUpStockCnt" parameterType="com.group4.client.BookOrderInsertDTO">
+		update stock_info set isbn_cnt=isbn_cnt-#{book_qty} where isbn13=#{isbn13}
+	</update>
+	-->
+	<insert id="getInsertOrderCnt" parameterType="com.group4.client.BookOrderInsertDTO">
+		insert into order_info values(
+			(select nvl(max(order_no), 0)+1 from order_info)
+			,#{cus_id}
+			,#{cus_pwd_order}
+			,#{delivery_addr}
+			,#{isbn13}
+			,#{book_qty}
+			,#{cus_requirement}
+			,'y'
+			,to_date(to_char(sysdate,'YYYY-MM-DD'), 'YYYY-MM-DD')
+		)
+	</insert>
+	
+	<insert id="getInsertReleaseCus" parameterType="com.group4.client.BookOrderInsertDTO">
+		insert into release_info(release_no, order_no) values(
+			(select nvl(max(release_no),0)+1 from release_info)
+			,(select nvl(max(order_no), 0) from order_info)
+		)
+	</insert>
+	
+	<insert id="getInsertOrderNoCnt" parameterType="com.group4.client.BookOrderInsertDTO">
+		insert into order_info values(
+			(select nvl(max(order_no), 0)+1 from order_info)
+			,#{cus_phone_order}
+			,#{cus_pwd_order}
+			,#{delivery_addr}
+			,#{isbn13}
+			,#{book_qty}
+			,#{cus_requirement}
+			,'y'
+			,to_date(to_char(sysdate,'YYYY-MM-DD'), 'YYYY-MM-DD')
+		)
+	</insert>
+	
+	<insert id="getInMemberCnt" parameterType="com.group4.client.BookOrderInsertDTO">
+		insert into customer(
+			cus_no, cus_name, cus_id, cus_phone, cus_delivery_addr, cus_pwd, home_tel, sign_up_dt, cus_type_cd, is_member
+		) values(
+			(select nvl(max(cus_no),0)+1 from customer)
+			,#{cus_name}
+			,null
+			,#{cus_phone}
+			,#{delivery_addr}
+			,#{cus_pwd}
+			,#{home_tel}
+			,to_date(to_char(sysdate,'YYYY-MM-DD'),'YYYY-MM-DD')
+			,01
+			,'n'
+		)
+	</insert>
+	
+	
+	<select id="getCheckCorpID" parameterType="com.group4.client.BookOrderInsertDTO" resultType="int">
+		select count(*) from corporation_cus where corp_no=#{corp_no}
+	</select>
+	
+	<insert id="getInsertOrderCorpCnt" parameterType="com.group4.client.BookOrderInsertDTO">
+		insert into corp_order_info values(
+			(select nvl(max(order_books_no),0)+1 from corp_order_info)
+			,#{isbn13}
+			,#{corp_no}
+			,null
+			,#{book_qty}
+			,to_date(to_char(sysdate,'YYYY-MM-DD'),'YYYY-MM-DD')
+		)
+	</insert>
+	
+	<insert id="getInsertReleaseCorp" parameterType="com.group4.client.BookOrderInsertDTO">
+		insert into release_info(release_no, order_books_no) values(
+			(select nvl(max(release_no),0)+1 from release_info)
+			,(select nvl(max(order_books_no), 0) from corp_order_info)
+		)
+	</insert>
+	
+	<insert id="insertDebit" parameterType="com.group4.client.BookOrderInsertDTO">
+		insert into ledger_info values(
+			(select nvl(max(b_no),0)+1 from ledger_info)
+			,to_date(to_char(sysdate,'YYYY-MM-DD'),'YYYY-MM-DD')
+			,#{isbn13}
+			,null
+			,#{book_qty}*(select book_price from book where isbn13=#{isbn13})
+			,null
+		)
+	</insert>
+	
+</mapper>
+
+
+

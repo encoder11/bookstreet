@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+	<!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.CLoginDAO">
+	
+	
+	<select id="getcusYLoginCnt" parameterType="com.group4.client.CustomerLoginDTO" resultType="int">
+		select count(*) from customer where cus_id=#{cus_id} and cus_pwd=#{cus_pwd}
+	</select>
+	
+	<!-- 
+	<insert parameterType="">
+	
+	</insert>
+	
+	<select id="getcusNLoginCnt" parameterType="com.group4.client.CustomerLoginDTO" resultType="int">
+		select count(*) from customer where cus_phone=#{cus_phone} and cus_pwd=#{cus_pwd}
+	</select>
+	 -->
+	
+</mapper>
+
+
+

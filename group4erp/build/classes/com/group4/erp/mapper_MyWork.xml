@@ -1,0 +1,356 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+	<!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.myWorkDAO">
+	<sql id="MyCareBookSearchWere">
+      <if test="searchCategory=='전체'">
+         <if test="(search_keyword!=null and search_keyword.length()>0)">
+            and(
+               upper(b.ISBN13) like upper('%${search_keyword}%')
+                or upper(b.book_name) like upper('%${search_keyword}%')
+                or upper(c1.cat_name) like upper('%${search_keyword}%')
+                or upper(b.book_price) like upper('%${search_keyword}%')
+                or upper(s1.ISBN_cnt) like upper('%${search_keyword}%')
+                or upper(c2.branch_name) like upper('%${search_keyword}%')
+                )
+         </if>
+      </if>
+      <if test="searchCategory=='책번호'">
+         <if test="(search_keyword!=null and search_keyword.length()>0)">
+            and upper(b.ISBN13) like upper('%${search_keyword}%')
+         </if>
+      </if>
+      <if test="searchCategory=='책이름'">
+         <if test="(search_keyword!=null and search_keyword.length()>0)">
+            and upper(b.book_name) like upper('%${search_keyword}%')
+         </if>
+      </if>
+      <if test="searchCategory=='카테고리'">
+         <if test="(search_keyword!=null and search_keyword.length()>0)">
+            and upper(c1.cat_name) like upper('%${search_keyword}%')
+         </if>
+      </if>
+      <if test="searchCategory=='보유지점'">
+         <if test="(search_keyword!=null and search_keyword.length()>0)">
+            and upper(c2.branch_name) like upper('%${search_keyword}%')
+         </if>
+      </if>
+      <if test="is_print!=null and is_print.length()>0">
+             and b.is_print = #{is_print}
+          </if>
+       <!-- 
+      <if test="(category!=null and category.length>0)">
+         and
+         <foreach collection="category" item="category" open="(" separator="or" close=")">
+            b.cat_cd = to_number(${category})
+         </foreach>
+      </if>
+       -->
+   </sql>
+	<sql id="WorkDaysListSearchWere">
+		<if test="searchEmpNo!=0">
+			and w.emp_no = ${searchEmpNo}
+		</if>
+	</sql>
+	
+	<sql id="headerSort">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null or sort==''">
+			order by 13, reg_dt desc
+		</if>
+	</sql>
+	
+<!--  이름 날짜 시작 -->
+	<!--=============================================================================================================================================-->
+	<!-- 담당 상품 조회 -->
+	<!--=============================================================================================================================================-->
+	<select id='getMyCareBookList' parameterType="com.group4.erp.MyWorkSearchDTO" resultType="java.util.HashMap">
+      select * from(select zzz.*, rownum RNUM from(         
+         select
+             b.isbn13 as "ISBN13"
+                  ,b.book_name as "BOOK_NAME"
+             ,c1.cat_name as "CAT_NAME"
+             ,b.book_price  as "BOOK_PRICE"
+             ,b.book_pages||'' as "BOOK_PAGES"
+             ,b.writer as "WRITER"
+             ,b.publisher  as "PUBLISHER"                 
+             ,b.size_cd||'' as "SIZE_CD"
+             ,b.is_print  as "IS_PRINT"
+             ,b.emp_no||'' as "EMP_NO"
+             ,to_char(b.published_dt,'YYYY-MM-DD') as "PUBLISHED_DT"
+             ,b.editor as "EDITOR"
+             ,s1.isbn_cnt as "ISBN_CNT"
+             ,c2.branch_name as "BRANCH_NAME"
+             ,b.reg_dt as "REG_DT" 
+         from book b inner join code_category c1 on b.cat_cd = c1.cat_cd
+              inner join stock_info s1 on b.isbn13 = s1.isbn13
+              inner join code_branch c2 on s1.branch_cd = c2.branch_cd  
+            where 1=1 
+               <include refid="MyCareBookSearchWere" />
+               and b.emp_no = '${emp_no}'
+         <if test="sort!=null and sort.length() > 0" >
+         order by ${sort}
+         </if>
+         <if test="sort==null or sort==''">
+         order by b.reg_dt desc
+         </if>
+      ) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>   
+                
+   </select>
+
+	<sql id="MyCareBookSearch">
+		<if test="searchCategory=='전체'">
+			<if test="(search_keyword!=null and search_keyword.length()>0)">
+				and(
+					upper(b.isbn13) like upper('%${search_keyword}%')
+				    or upper(b.book_name) like upper('%${search_keyword}%')
+				    or upper((select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd)) like upper('%${search_keyword}%')
+				    or upper(b.book_price) like upper('%${search_keyword}%')
+				    or upper((select si.ISBN_cnt from stock_info si where b.ISBN13 = si.ISBN13)) like upper('%${search_keyword}%')
+				    or upper((select c.branch_name from code_branch c where c.branch_cd in(select bc.branch_cd from stock_info bc where bc.ISBN13 in(b.ISBN13)))) like upper('%${search_keyword}%')
+			    	)
+			</if>
+		</if>
+		
+		<if test="searchCategory=='책번호'">
+			<if test="(search_keyword!=null and search_keyword.length()>0)">
+				and upper(b.isbn13) like upper('%${search_keyword}%')
+			</if>
+		</if>
+		
+		<if test="searchCategory=='책이름'">
+			<if test="(search_keyword!=null and search_keyword.length()>0)">
+				and upper(b.book_name) like upper('%${search_keyword}%')
+			</if>
+		</if>
+		
+		<if test="searchCategory=='카테고리'">
+			<if test="(search_keyword!=null and search_keyword.length()>0)">
+				and upper((select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd)) like upper('%${search_keyword}%')
+			</if>
+		</if>
+		
+		<if test="searchCategory=='보유지점'">
+			<if test="(search_keyword!=null and search_keyword.length()>0)">
+				and upper((select c.branch_name from code_branch c where c.branch_cd in(select bc.branch_cd from stock_info bc where bc.ISBN13 in(b.ISBN13)))) like upper('%${search_keyword}%')
+			</if>
+		</if>
+		 <!-- 
+		<if test="(category!=null and category.length>0)">
+			and
+			<foreach collection="category" item="category" open="(" separator="or" close=")">
+				b.cat_cd = to_number(${category})
+			</foreach>
+		</if>
+		 -->
+		 <if test="is_print!=null and is_print.length()>0">
+		 	and b.is_print = #{is_print}
+		 </if>
+	</sql>
+	
+	
+	<select id='getCategoryList' resultType="java.util.HashMap">
+		select
+			cat_cd		as	"cat_cd"
+			, cat_name	as	"cat_name"
+		from code_category
+		where 1=1
+	</select>
+	
+	<select id='getBookSizeList' resultType="java.util.HashMap">
+		select
+			size_cd		as	"size_cd"
+			, size_name	as	"size_name"
+		from code_book_size
+		where 1=1
+	</select>
+	
+	<select id='getBranchList' resultType="java.util.HashMap">
+		select
+			branch_cd		as	"branch_cd"
+			, branch_name	as	"branch_name"
+		from code_branch
+		where 1=1
+	</select>
+	
+	<select id='getPublisherList' resultType="java.util.HashMap">
+		select distinct publisher	as	"publisher" from book
+	</select>
+	
+	<select id='getMyWorkListAllCnt' parameterType="com.group4.erp.MyWorkSearchDTO" resultType="int">
+      select count(*) from(
+         select
+             b.isbn13 as "ISBN13"
+                  ,b.book_name as "BOOK_NAME"
+             ,c1.cat_name as "CAT_NAME"
+             ,b.book_price  as "BOOK_PRICE"
+             ,b.book_pages||'' as "BOOK_PAGES"
+             ,b.writer as "WRITER"
+             ,b.publisher  as "PUBLISHER"                 
+             ,b.size_cd||'' as "SIZE_CD"
+             ,b.is_print  as "IS_PRINT"
+             ,b.emp_no||'' as "EMP_NO"
+             ,to_char(b.published_dt,'YYYY-MM-DD') as "PUBLISHED_DT"
+             ,b.editor as "EDITOR"
+             ,s1.isbn_cnt as "ISBN_CNT"
+             ,c2.branch_name as "BRANCH_NAME"
+             ,b.reg_dt as "REG_DT" 
+         from book b inner join code_category c1 on b.cat_cd = c1.cat_cd
+              inner join stock_info s1 on b.isbn13 = s1.isbn13
+              inner join code_branch c2 on s1.branch_cd = c2.branch_cd  
+         
+            where 1=1 
+               <include refid="MyCareBookSearchWere" />
+               and b.emp_no = '${emp_no}'
+      )
+   </select>
+					
+	<!--=============================================================================================================================================-->
+	<!-- 근태조회 -->
+	<!--=============================================================================================================================================-->
+	<select id='getWorkDaysListAllCnt' parameterType="com.group4.erp.MyWorkSearchDTO" resultType="int">
+		select count(*) from(
+			select
+			    w.*, e.emp_name, d.dep_name, cj.jikup, w.days_attended
+			from work_days_mng w, employee e, dept d, code_jikup cj
+			where w.emp_no=e.emp_no and e.dep_no=d.dep_no and e.jikup_cd=cj.jikup_cd
+			<include refid="WorkDaysListSearchWere" />
+		)
+	</select>
+	
+	<select id='getWorkDaysList' parameterType="com.group4.erp.MyWorkSearchDTO" resultType="java.util.HashMap">
+		select * from(select zzz.*, rownum RNUM from(
+			select
+			    w.emp_no                as  "EMP_NO"
+			    , e.emp_name            as  "emp_name"
+			    , d.dep_name            as  "dep_name"
+			    , cj.jikup              as  "jikup"
+			    , w.days_attended       as  "days_attended"
+			    , w.days_absent         as  "days_absent"
+			    , w.days_leaving_early  as  "days_leaving_early"
+			    , w.days_outduty        as  "days_outduty"
+			    , w.days_late           as  "days_late"
+			from work_days_mng w, employee e, dept d, code_jikup cj
+			where w.emp_no=e.emp_no and e.dep_no=d.dep_no and e.jikup_cd=cj.jikup_cd
+			<include refid="WorkDaysListSearchWere" />
+			<if test="sort!=null and sort.length() > 0" >
+				order by ${sort}
+			</if>
+			<if test="sort==null or sort==''">
+				order by w.emp_no
+			</if>
+		) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+			
+	</select>
+	
+	<select id='getSearchEmpNo' resultType="java.util.HashMap">
+		select e.emp_no	as	"emp_no" from employee e, work_days_mng w where e.emp_no = w.emp_no
+	</select>
+	
+	<insert id="insertWHBefore" parameterType="Hashmap">
+		insert into books_inven_order_info values(
+			(select nvl(max(order_inven_no), 0)+1 from books_inven_order_info)
+			,#{isbn}
+			,#{isbn_cnt}
+			,#{supply_rate}
+			,(#{isbn_cnt}*(select book_price from book where isbn13=#{isbn}))
+			,sysdate
+			,01
+			,to_date(#{datepicker}, 'YYYY-MM-DD')
+		)
+	</insert>
+	
+	<insert id="insertWareHousing" parameterType="Hashmap">
+		insert into warehousing_info values(
+			(select nvl(max(wh_no), 0)+1 from warehousing_info)
+			,(select nvl(max(order_inven_no), 0) from books_inven_order_info)
+			,null
+		)
+	</insert>
+	
+	<select id="empDayoffTot" resultType="int">
+		select count(*) from emp_dayoff_apply where start_dayoff between TRUNC(sysdate,'MM') and LAST_DAY(sysdate)
+			or end_dayoff between TRUNC(sysdate,'MM') and LAST_DAY(sysdate)
+	</select>
+	
+	<select id="selectRemain" parameterType="int" resultType="java.util.Map">
+		select
+			remain_dayoff||''	as	"remain_dayoff"
+			,dayoff_tot||''		as	"dayoff_tot"
+		from emp_dayoff_info where emp_no=#{emp_no}
+	</select>
+	
+	<select id="selectDayoff" parameterType="com.group4.erp.HrDayoffJoinDTO" resultType="int">
+		select count(*) from emp_dayoff_apply where emp_no=#{emp_no} and dayoff_apply_dt between TRUNC(sysdate,'MM') and LAST_DAY(sysdate)
+	</select>
+	
+	<insert id="insertDayoff" parameterType="com.group4.erp.HrDayoffJoinDTO">
+		insert into emp_dayoff_apply values(
+			(select nvl(max(dayoff_apply_no), 0)+1 from emp_dayoff_apply)
+			,#{emp_no}
+			,to_date(to_char(sysdate, 'YYYY-MM-DD'), 'YYYY-MM-DD')
+			,#{dayoff_cd}
+			<if test="dayoff_cd==5">
+			,#{harf_dayoff}
+			</if>
+			<if test="dayoff_cd!=5">
+			,#{using_dayoff}
+			</if>
+			,to_date(#{start_dayoff}, 'YYYY-MM-DD')
+			,to_date(#{end_dayoff}, 'YYYY-MM-DD')
+			,'N'
+			)
+	</insert>
+	
+	<update id="updateDayoff" parameterType="com.group4.erp.HrDayoffJoinDTO">
+		update emp_dayoff_info set
+		remain_dayoff=remain_dayoff-
+			<if test="dayoff_cd==5">
+			#{harf_dayoff}
+			</if>
+			<if test="dayoff_cd!=5">
+			#{using_dayoff}
+			</if> where emp_no=#{emp_no}
+	</update>
+	
+	<update id="upExceptionDayoffInfo" parameterType="com.group4.erp.HrDayoffJoinDTO">
+		update emp_dayoff_info set dayoff_tot = dayoff_tot+#{using_dayoff} where emp_no=#{emp_no}
+	</update>
+	
+	
+	<select id="getDayOffApplyNo" parameterType="int" resultType="String">
+		select dayoff_apply_no||''
+		from emp_dayoff_apply
+		where 1=1
+		and emp_no=#{emp_no}
+		and confirm='N' or confirm='n'
+	
+	</select>
+	
+	<select id="getMyDayOffApproval" parameterType="int" resultType="com.group4.erp.DayOffApplyDTO">
+        select     
+        d.dayoff_apply_no "dayoff_apply_no",    
+        d.emp_no "emp_no", 
+        (select e.emp_name from employee e where e.emp_no=(select ee.mgr_emp_no from employee ee where ee.emp_no = d.emp_no) ) "mgr_name",
+        (select c.jikup from code_jikup c where jikup_cd=(select e.jikup_cd from employee e where e.emp_no=(select d.emp_no from emp_dayoff_apply d where d.dayoff_apply_no=#{dayoff_apply_no}) ) ) "jikup",
+        (select e.emp_name from employee e where e.emp_no=(select d.emp_no from emp_dayoff_apply d where d.dayoff_apply_no=#{dayoff_apply_no}) ) "emp_name",   
+        d.dayoff_apply_dt "dayoff_apply_dt",    
+        (select c.dayoff_name from code_dayoff c where c.dayoff_cd = d.dayoff_cd) "dayoff_category",   
+        d.using_dayoff "using_dayoff",    
+        to_char(d.start_dayoff, 'yyyy-mm-dd') "start_dayoff",    
+        to_char(d.end_dayoff, 'yyyy-mm-dd') "end_dayoff",    
+        d.confirm "confirm"   
+        from emp_dayoff_apply d   where 1=1   and d.dayoff_apply_no=#{dayoff_apply_no}
+	</select>
+	
+	
+</mapper>

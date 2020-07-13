@@ -1,0 +1,230 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+	<!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.ApprovalDAO">
+
+
+
+	<select id="getApprovalReqCnt" parameterType="com.group4.erp.ApprovalSearchDTO" resultType="int">
+		select count(*) from e_works_info ap
+		where 1=1
+		and ap.e_works_state_cd != '0'
+		and ap.emp_no = #{emp_no}
+	</select>
+	
+	<select id="getApprovalReqList" parameterType="com.group4.erp.ApprovalSearchDTO" resultType="com.group4.erp.ApprovalDTO">
+		select
+			ap.e_works_no "e_works_no",
+			ap.document_no "document_no",
+			ap.emp_no "emp_no",
+			(select e.emp_name from employee e where e.emp_no = ap.emp_no) "emp_name",
+			mgr_emp_no "mgr_emp_no",
+			(select e.emp_name from employee e where e.emp_no = ap.mgr_emp_no) "mgr_name",
+			to_char(ap.e_works_req_dt, 'yyyy.mm.dd(dy) hh24:mi:ss', 'nls_date_language=Korean') "e_works_req_dt",
+			ap.e_works_state_cd "e_works_state_cd",
+			(select c.evnt_state_name from code_ad_state c where c.evnt_state_cd = ap.e_works_state_cd) "approval_state",
+			ap.e_work_comment "e_work_comment"
+		from e_works_info ap
+		where 1=1
+		and ap.e_works_state_cd != '0'
+		and ap.emp_no = #{emp_no}	
+		<include refid="headerSort" />
+	</select>
+	
+	
+	<sql id="headerSort">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		
+		<if test="sort==null or sort.length() == 0">
+			order by ap.e_works_req_dt desc
+
+		</if>
+	</sql>
+	
+	<select id="getApprovalResCnt" parameterType="com.group4.erp.ApprovalSearchDTO" resultType="int">
+		select count(*) from e_works_info ap
+		where 1=1
+		and e_works_state_cd in (1, 6, 7)
+		and ap.mgr_emp_no = #{emp_no}
+
+	</select>
+	
+	<select id="getApprovalCEOResCnt" parameterType="com.group4.erp.ApprovalSearchDTO" resultType="int">
+		select count(*) from e_works_info ap
+		where 1=1
+		and (ap.e_works_state_cd = '7') 
+        or (ap.e_works_state_cd in ('1', '3') and ap.mgr_emp_no=100001)  
+
+	</select>
+
+	
+	<select id="getApprovalResList" parameterType="com.group4.erp.ApprovalSearchDTO" resultType="com.group4.erp.ApprovalDTO">
+	select
+      		rownum "APPROVAL_NUM",
+			ap.e_works_no "E_WORKS_NO",
+            ap.document_no "DOCUMENT_NO",
+            ap.emp_no "EMP_NO",        
+            ap.mgr_emp_no "MGR_EMP_NO",
+            (select c.jikup from code_jikup c where c.jikup_cd = (select e.jikup_cd from employee e where e.emp_no = ap.emp_no) )  "JIKUP",
+            (select e.emp_name from employee e where e.emp_no = ap.emp_no) "EMP_NAME",            
+            to_char(ap.e_works_req_dt, 'yyyy.mm.dd(dy) hh24:mi:ss', 'nls_date_language=Korean') "E_WORKS_REQ_DT",
+			ap.e_works_state_cd "E_WORKS_STATE_CD",
+			(select c.evnt_state_name from code_ad_state c where c.evnt_state_cd = ap.e_works_state_cd) "APPROVAL_STATE"
+		from e_works_info ap
+			where 1=1
+			and ap.e_works_state_cd in (1, 3, 6, 7) 
+			and ap.mgr_emp_no = #{emp_no}
+			<include refid="headerSort" />
+
+      	<!--  select
+            approval_num "approval_num",
+            e_works_no "e_works_no",
+            document_no "document_no",
+            emp_no "emp_no",
+            mgr_emp_no "mgr_emp_no",
+            jikup "jikup",
+            emp_name "emp_name",
+            e_works_req_dt "e_works_req_dt",
+            e_works_state_cd "e_works_state_cd",
+            approval_state "approval_state"     
+        from
+        (select
+      		rownum "APPROVAL_NUM",
+			ap.e_works_no "E_WORKS_NO",
+            ap.document_no "DOCUMENT_NO",
+            ap.emp_no "EMP_NO",        
+            ap.mgr_emp_no "MGR_EMP_NO",
+            (select c.jikup from code_jikup c where c.jikup_cd = (select e.jikup_cd from employee e where e.emp_no = ap.emp_no) )  "JIKUP",
+            (select e.emp_name from employee e where e.emp_no = ap.emp_no) "EMP_NAME",            
+            to_char(ap.e_works_req_dt, 'yyyy.mm.dd(dy) hh24:mi:ss', 'nls_date_language=Korean') "E_WORKS_REQ_DT",
+			ap.e_works_state_cd "E_WORKS_STATE_CD",
+			(select c.evnt_state_name from code_ad_state c where c.evnt_state_cd = ap.e_works_state_cd) "APPROVAL_STATE"
+		from e_works_info ap
+			where 1=1
+			and ap.e_works_state_cd in (1, 3, 6, 7) 
+			and ap.mgr_emp_no = #{emp_no}
+		)
+		<include refid="headerSort" /> -->
+	</select>
+	
+	
+	<select id="getApprovalCEOResList" parameterType="com.group4.erp.ApprovalSearchDTO" resultType="com.group4.erp.ApprovalDTO">
+      	select
+      		rownum "approval_num",
+			ap.e_works_no "e_works_no",
+			ap.document_no "document_no",
+			ap.emp_no "emp_no",        
+            ap.mgr_emp_no "mgr_emp_no",
+            (select e.emp_name from employee e where e.emp_no = ap.mgr_emp_no) "mgr_name", 
+			(select c.jikup from code_jikup c where c.jikup_cd = (select e.jikup_cd from employee e where e.emp_no = ap.emp_no) )  "jikup",
+			(select e.emp_name from employee e where e.emp_no = ap.emp_no) "emp_name",			
+			to_char(ap.e_works_req_dt, 'yyyy.mm.dd(dy) hh24:mi:ss', 'nls_date_language=Korean') "e_works_req_dt",
+			ap.e_works_state_cd "e_works_state_cd",
+			(select c.evnt_state_name from code_ad_state c where c.evnt_state_cd = ap.e_works_state_cd) "approval_state"
+		from e_works_info ap
+		where 1=1
+        and (ap.e_works_state_cd = '7') 
+        or (ap.e_works_state_cd in ('1', '3') and ap.mgr_emp_no=100001)  
+        <include refid="headerSort" />
+        <!-- and exists(select * from e_works_info where mgr_emp_no=100001 and e_works_state_cd in ('1', '3') ) -->
+
+	</select>
+	
+	
+	<!-- <sql id="WhereCondition">
+	
+		<if test="isCEO==1">
+			and ap.e_works_state_cd = '7'	
+		</if>
+		
+		<if test="isCEO==0">
+			and ap.e_works_state_cd not in (2, 4)
+			and ap.mgr_emp_no = #{emp_no}
+		</if>
+		
+	</sql> -->
+	
+	
+	
+	<insert id="insertApproval" parameterType="com.group4.erp.ApprovalDTO">
+		
+		insert into e_works_info (
+			e_works_no,
+			document_no,
+			emp_no,
+			e_works_cd,
+			mgr_emp_no,
+			e_works_req_dt,
+			e_works_res_dt,
+			e_works_state_cd,
+			e_work_comment		
+		) values (
+			(select nvl(count(*), 0)+1 from e_works_info),
+			#{document_no},
+			#{emp_no},
+			#{document_no},
+			(select e.mgr_emp_no from employee e where e.emp_no = #{emp_no}),
+			sysdate,
+			null,
+			'1',
+			#{e_work_comment}
+		)
+			
+	</insert>
+	
+	<update id="updateApprovalState" parameterType="String">
+		update e_works_info set e_works_state_cd='3'
+		where document_no = #{document_no}
+	</update>
+	
+	<update id="updateEventState" parameterType="String">
+		update event_info set evnt_state_cd='3'
+		where evnt_no = #{document_no}
+	</update>
+	
+
+	<update id="updateApprovalProc" parameterType="com.group4.erp.ApprovalDTO">
+		update e_works_info set 
+			e_works_req_dt = sysdate,
+			e_works_state_cd=#{e_works_state_cd},
+			e_work_comment=#{e_work_comment}
+		where document_no = #{document_no}
+	</update>
+	
+	<select id="getMyReApprovalCnt" parameterType="String" resultType="int">
+		select count(*) from e_works_info
+		where document_no = #{document_no}
+	</select>
+	
+	<update id="updateBTripApproval" parameterType="com.group4.erp.ApprovalDTO">
+	
+		update work_outside_info set
+			travel_payment = #{confirm}
+		where work_outside_seq = #{doc_no}
+	</update>
+
+	
+	<update id="deleteBTripApplyInfo" parameterType="com.group4.erp.BusinessTripDTO">
+	
+		update work_outside_info set
+			DELETE_YN = #{deleteYn}
+		where work_outside_seq = #{work_outside_seq}
+	</update>
+	
+	<update id="deleteBTripApproval" parameterType="com.group4.erp.ApprovalDTO">
+	
+		update e_works_info set
+			e_works_state_cd = '0'
+		where document_no = #{document_no}
+	</update>
+
+	 
+</mapper>

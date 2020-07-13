@@ -1,0 +1,518 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+   <!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+   <!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.invenSearchDAO">
+   <!-- 로그인 아이디, 암호의 존재 개수를 검색하는 select문을 내포한 <select> 태그 선언 -->
+   <!-- 
+      * <select> 태그 속성 설명
+      id="getAdminCnt" ==> SQL 구문의 고유 아이디값 설정. DAO 클래스의 메소드 이름과 동일
+      parameterType="hashmap" ==> SQL 구문에 삽입될 외부 데이터의 자료형 설정
+      resultType="int" ==> SQL 구문의 실행 후 리턴값 자료형 설정
+      
+      * SQL 구문 안의 #{HashMap객체키값명} 설명
+      키값에 대응하는 데이터가 문자열을 삽입하라는 뜻이다. 만약 문자면 ''(싱글쿼트)로 감싸 삽입하고 아니면 그대로 삽입한다.
+      
+      * SQL 구문 안의 #{HashMap객체키값명} 설명
+      키값에 대응하는 데이터의 종류에 관계없이 데이터를 그대로 삽입
+   
+    -->  
+    
+	<sql id="bookList">
+		<if test="category_name!=null and category_name.length>0">
+        and
+        <foreach collection="category_name" item="cat" open="(" separator="or" close=")">
+        	<if test="cat.equals('시&amp;소설')">
+              	(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+            </if>
+            <if test="cat.equals('사회')">
+            	(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+            </if>
+            <if test="cat.equals('철학&amp;역사')">
+            	(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+            </if>
+             		<if test="cat.equals('IT&amp;과학')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if>
+             		<if test="cat.equals('예술')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+            	 	</if>
+             		<if test="cat.equals('종교')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if>
+             		<if test="cat.equals('만화')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if>
+             		<if test="cat.equals('여행')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if>
+            	 	<if test="cat.equals('에세이')">
+                 		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if>
+             		<if test="cat.equals('요리')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if> 
+             		<if test="cat.equals('교재&amp;수험서')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if>
+             		<if test="cat.equals('어학')">
+                  		(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) =  #{cat}
+             		</if> 
+             		
+            	</foreach>
+      	</if>
+      
+      <if test="size_cd!=null and size_cd.length>0">
+      and
+         <foreach collection="size_cd" item="size_cd" open="(" separator="or" close=")">
+             <if test="size_cd==1">
+                  b.size_cd =  #{size_cd}
+             </if>
+             <if test="size_cd==2">
+                  b.size_cd =  #{size_cd}
+             </if>
+             <if test="size_cd==3">
+                  b.size_cd =  #{size_cd}
+             </if>
+             <if test="size_cd==4">
+                  b.size_cd =  #{size_cd}
+             </if>
+             <if test="size_cd==5">
+                  b.size_cd =  #{size_cd}
+             </if>
+             <if test="size_cd==6">
+                  b.size_cd =  #{size_cd}
+             </if>
+             <if test="size_cd==7">
+                  b.size_cd =  #{size_cd}
+             </if>
+             <if test="size_cd==8">
+                  b.size_cd =  #{size_cd}
+             </if>
+         </foreach>
+      </if>
+      
+      <if test="inventory_loc!=null and inventory_loc.length>0">
+      and
+         <foreach collection="inventory_loc" item="loc" open="(" separator="or" close=")">
+             <if test="loc==1">
+                 (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = ${loc}
+                 <!-- (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = '5' -->
+             </if>
+             <if test="loc==2">
+                 (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = ${loc}
+                 <!-- (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = '4' -->
+             </if>
+             <if test="loc==3">
+                 (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = ${loc}
+                <!--  (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = '3' -->
+             </if>
+             <if test="loc==4">
+                 (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = ${loc}
+                 <!-- (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = '1' -->
+             </if>
+             <if test="loc==5">
+                 (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = ${loc}
+                 <!-- (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = '2' -->
+             </if>
+             <if test="loc==6">
+                 (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = ${loc}
+                 <!-- (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = '6' -->
+             </if>
+             <if test="loc==7">
+                 (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = ${loc}
+                 <!-- (select s.branch_cd from stock_info s where s.isbn13=b.isbn13) = '7' -->
+             </if>
+         </foreach>
+      </if>
+
+      <if test="searchPublisher != null and searchPublisher.length()>0">
+             and
+              ( publisher = #{searchPublisher} )
+      </if>
+      
+      <if test="is_print != null and is_print.length()>0">
+             and
+              ( is_print = #{is_print} )
+      </if>
+   
+      <if test="book_keyword!=null and book_keyword.length()>0 ">
+         and(
+           upper(b.ISBN13) like upper('%${book_keyword}%')
+           or upper(b.book_name) like upper('%${book_keyword}%')
+           or upper( (select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd) ) like upper('%${book_keyword}%')
+           or upper(b.book_price) like upper ('%${book_keyword}%')
+           or upper((select s.isbn_cnt from stock_info s where s.isbn13=b.isbn13)) like upper('%${book_keyword}%')
+           or upper(b.writer) like upper('%${book_keyword}%')
+           or upper(b.publisher) like upper('%${book_keyword}%')
+           or upper(b.size_cd) like upper('%${book_keyword}%')
+           or upper(b.is_print) like upper('%${book_keyword}%')
+           or upper(b.emp_no) like upper('%${book_keyword}%')
+           or upper(to_char(b.published_dt,'YYYY-MM-DD')) like upper('%${book_keyword}%')
+           or upper((select cb.branch_name from code_branch cb where cb.branch_cd=(select s.branch_cd from stock_info s where s.isbn13=b.isbn13))) like upper('%${book_keyword}%')
+         )
+      </if>   
+	</sql>
+	
+	<sql id="returnWhere">
+		<if test="searchKeyword !=null and searchKeyword.length() > 0" >
+			and (
+					upper(return_sales_no) like upper('%${searchKeyword}%') 
+					or upper(order_no) like upper('%${searchKeyword}%')
+					or upper(isbn13) like upper('%${searchKeyword}%')
+					or upper(return_comment) like upper('%${searchKeyword}%')
+					or upper(return_cause) like upper('%${searchKeyword}%')
+					or upper(to_char(return_order_dt, 'YYYY-MM-DD')) like upper('%${searchKeyword}%')
+					or upper( book_name ) like upper('%${searchKeyword}%')
+				)	
+		</if>
+		
+		
+		<if test="return_cd != null">
+			and
+			<foreach collection="return_cd" item="return_cd"  open="(" separator=" or " close=")">
+				<if test="return_cd.equals('01')">
+					return_sales_cd='01'
+				</if>
+				<if test="return_cd.equals('02')">
+					return_sales_cd='02'
+				</if>
+				<if test="return_cd.equals('03')">
+					return_sales_cd='03'
+				</if>
+				<if test="return_cd.equals('04')">
+					return_sales_cd='04'
+				</if>
+				<if test="return_cd.equals('05')">
+					return_sales_cd='05'
+				</if>			
+			</foreach>	
+		</if>
+		<if test="searchToday!=null and searchToday.length()>0">
+            and ( to_char(return_order_dt,'YYYY-MM-DD') = to_char(sysdate, 'YYYY-MM-DD') )
+     	</if>
+		<if test="( dateFrom != null and dateFrom.length()>0 )  or  ( dateTill != null and dateTill.length()>0 )">
+		   and( 
+		</if>   
+		<if test="( dateFrom!=null and dateFrom.length()>0 ) and ( dateTill.equals('') )">
+		   return_order_dt &gt;= to_date( #{dateFrom}, 'YYYY-MM-DD') 
+		</if>
+		<if test="( dateTill!=null and dateTill.length()>0 ) and ( dateFrom.equals('')  )">
+		   return_order_dt &lt;= to_date( #{dateTill}, 'YYYY-MM-DD') 
+		</if>
+		<if test="( dateFrom!=null and dateFrom.length()>0 )and ( dateTill != null and dateTill.length()>0 )">
+		   ( return_order_dt &gt;= to_date( #{dateFrom}, 'YYYY-MM-DD') )  and ( return_order_dt &lt;= to_date( #{dateTill}, 'YYYY-MM-DD') ) 
+		</if>
+		<if test="( dateFrom != null and dateFrom.length()>0 )  or  ( dateTill != null and dateTill.length()>0 )">
+		   ) 
+		</if>
+	</sql>
+	
+	<sql id="headerSort">
+		<if test="sort!=null and sort.length() > 0" >
+			order by ${sort}
+		</if>
+		<if test="sort==null">
+			order by 1
+		</if>
+	</sql>
+
+	<sql id="releaseWhere">
+		<if test="inventory_loc!=null and inventory_loc.length>0">
+     	 and
+         <foreach collection="inventory_loc" item="loc" open="(" separator="or" close=")">
+             <if test="loc.equals('서울 가산점')">
+                 order_books_no=(select order_books_no from corp_order_info where branch_cd = (select branch_cd from code_branch where branch_name='${loc}') ) 
+             </if>
+             <if test="loc.equals('서울 강남점')">
+                 order_books_no=(select order_books_no from corp_order_info where branch_cd = (select branch_cd from code_branch where branch_name='${loc}') ) 
+             </if>
+             <if test="loc.equals('부산점')">
+                 order_books_no=(select order_books_no from corp_order_info where branch_cd = (select branch_cd from code_branch where branch_name='${loc}') ) 
+             </if>
+             <if test="loc.equals('대전점')">
+                 order_books_no=(select order_books_no from corp_order_info where branch_cd = (select branch_cd from code_branch where branch_name='${loc}') ) 
+             </if>
+             <if test="loc.equals('광주점')">
+                 order_books_no=(select order_books_no from corp_order_info where branch_cd = (select branch_cd from code_branch where branch_name='${loc}') ) 
+             </if>
+             <if test="loc.equals('세종점')">
+                 order_books_no=(select order_books_no from corp_order_info where branch_cd = (select branch_cd from code_branch where branch_name='${loc}') ) 
+             </if>
+             <if test="loc.equals('춘천점')">
+                 order_books_no=(select order_books_no from corp_order_info where branch_cd = (select branch_cd from code_branch where branch_name='${loc}') ) 
+             </if>
+         </foreach>
+      </if>
+      <if test="keyword1!=null and keyword1.length()>0">
+      	and(
+      		upper((select book_name from book where isbn13=(select isbn13 from order_info where order_no=r.order_no ))) like upper('%${keyword1}%')
+      		or upper((select book_name from book where isbn13=(select isbn13 from corp_order_info where order_books_no=r.order_books_no ))) like upper('%${keyword1}%')
+      		or upper( (case when r.order_no is null then r.order_books_no else r.order_no end) ) like upper('%${keyword1}%')
+      		or upper( to_char(r.release_no) ) like upper('%${keyword1}%')
+      		or upper( to_char(r.release_dt, 'YYYY-MM-DD') ) like upper('%${keyword1}%')
+           )
+      </if>
+      <if test="searchPublisher != null and searchPublisher.length()>0">
+             and
+              (
+              (select publisher from book where isbn13=(select isbn13 from order_info where order_no=r.order_no)) = #{searchPublisher}
+              or (select publisher from book where isbn13=(select isbn13 from corp_order_info where order_books_no=r.order_books_no)) = #{searchPublisher}
+               )
+      </if>
+      <if test="searchToday!=null and searchToday.length()>0">
+            and ( to_char(r.release_dt,'YYYY-MM-DD') = to_char(sysdate, 'YYYY-MM-DD') )
+      </if>
+       <if test="( dateFrom != null and dateFrom.length()>0 )  or  ( dateTill != null and dateTill.length()>0 )">
+          and( 
+       </if>   
+       <if test="( dateFrom!=null and dateFrom.length()>0 ) and ( dateTill.equals('') )">
+          r.release_dt &gt;= to_date( #{dateFrom}, 'YYYY-MM-DD') 
+       </if>
+       <if test="( dateTill!=null and dateTill.length()>0 ) and ( dateFrom.equals('')  )">
+          r.release_dt &lt;= to_date( #{dateTill}, 'YYYY-MM-DD') 
+       </if>
+       <if test="( dateFrom!=null and dateFrom.length()>0 )and ( dateTill != null and dateTill.length()>0 )">
+          ( r.release_dt &gt;= to_date( #{dateFrom}, 'YYYY-MM-DD') )  and ( r.release_dt &lt;= to_date( #{dateTill}, 'YYYY-MM-DD') ) 
+       </if>
+       <if test="( dateFrom != null and dateFrom.length()>0 )  or  ( dateTill != null and dateTill.length()>0 )">
+          ) 
+       </if>
+	</sql>
+
+	<select id="getBookListCnt" parameterType="com.group4.erp.InvenSearchDTO" resultType="int">
+
+		select count(*) from book b where 1=1 <include refid="bookList" />
+
+	</select>
+	 
+	<select id='getBookList' parameterType="com.group4.erp.InvenSearchDTO" resultType="java.util.HashMap">
+		select * from(select zzz.*, rownum RNUM from(
+			select
+				ISBN13 					as "ISBN13"
+				,book_name 				as "book_name"
+				,(select cc.cat_name from code_category cc where cc.cat_cd=b.cat_cd)	as "cat_name"
+				,to_char(book_price,'999,999')||'원'  			as "book_price"
+				,to_char((select s.isbn_cnt from stock_info s where s.isbn13=b.isbn13),'999,999,999') 		as "book_cnt"
+				,writer 				as "writer"
+				,publisher 				as "publisher"
+				,size_cd||'' 			as "size_cd"
+				,is_print 				as "is_print"
+				,emp_no||''				as "emp_no"
+				,to_char(published_dt,'YYYY-MM-DD') as "published_dt" 
+				,(select cb.branch_name from code_branch cb where cb.branch_cd=(select s.branch_cd from stock_info s where s.isbn13=b.isbn13))	as "branch_name"
+			from book b	
+			where 1=1 
+			<include refid="bookList" />
+				<if test="sort!=null and sort.length()>0">
+	 				order by ${sort}
+	 			</if>
+	 			<if test="sort==null or sort.length()==0">
+	 				order by published_dt desc
+	 			</if>
+
+		) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+	</select>
+	
+	
+	
+	<!-- 출고현황 -->
+	<select id="getReleaseListCnt" parameterType="com.group4.erp.InvenSearchDTO" resultType="int">
+		select count(*) from release_info r where 1=1  <include refid="releaseWhere" />
+	</select>
+	
+	<select id='getReleaseList' parameterType="com.group4.erp.InvenSearchDTO" resultType="java.util.HashMap">
+		select * from(select zzz.*, rownum RNUM from(
+			select
+				r.release_no||''		as	"release_no"
+				,nvl( to_char(r.release_dt, 'YYYY-MM-DD DY'), 'X')			as	"release_dt"
+				,(case when r.order_no is null then r.order_books_no else r.order_no end)		as	"all_order_no"
+			from release_info r	
+			where 1=1
+			<include refid="releaseWhere" />
+			<if test="sort!=null and sort.length() > 0" >
+				order by ${sort}
+			</if>
+			<if test="sort==null or sort==''">
+				order by "release_dt" desc
+			</if>
+			
+		) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+	</select>
+	
+	<select id='getReleaseCusInfo' parameterType="int" resultType="com.group4.erp.Cus_releaseInfoDTO">
+		select
+			order_no||''	as	"all_order_num"
+		    ,isbn13			as	"isbn13"
+		    ,order_id		as	"cus_id"
+		    ,(select b.book_name from book b where b.isbn13=i.isbn13) as "book_name"
+		    ,order_delivery_addr	as	"order_delivery_addr"
+		    ,to_char(order_dt, 'YYYY-MM-DD DY')				as	"order_dt"
+		    ,to_char(book_qty,'999,999,999')				as	"book_qty"
+		    ,(select b.publisher from book b where b.isbn13=i.isbn13) as "publisher"
+		    ,to_char((select b.book_price from book b where b.isbn13=i.isbn13),'999,999,999,999') as "book_price"
+		    ,to_char(( (select b.book_price from book b where b.isbn13=i.isbn13)*book_qty ),'999,999,999,999') as "all_book_price"
+		    ,(select e.emp_name from employee e where e.emp_no=(select b.emp_no from book b where b.isbn13=i.isbn13)) as "emp_name"
+		from order_info i where order_no=#{all_order_no}
+	</select>
+	 
+	<select id='getReleaseCorpInfo' parameterType="int" resultType="com.group4.erp.Cus_releaseInfoDTO">
+		select
+			order_books_no||''		as	"all_order_num"
+		    ,isbn13		as	"isbn13"
+		    ,corp_no	as	"cus_id"
+		    ,(select b.book_name from book b where b.isbn13=c.isbn13)	as "book_name"
+		    ,(select co.corp_addr from corporation_cus co where co.corp_no=c.corp_no)	as	"order_delivery_addr"
+		    ,to_char(order_dt, 'YYYY-MM-DD DY')				as	"order_dt"
+		    ,to_char(books_qty,'999,999,999')			as	"book_qty"
+		    ,(select b.publisher from book b where b.isbn13=c.isbn13)		as "publisher"
+		    ,to_char((select b.book_price from book b where b.isbn13=c.isbn13),'999,999,999,999')		as "book_price"
+		    ,to_char(( (select b.book_price from book b where b.isbn13=c.isbn13)*books_qty ),'999,999,999,999')		as "all_book_price"
+		    ,(select e.emp_name from employee e where e.emp_no=(select b.emp_no from book b where b.isbn13=c.isbn13))	as "emp_name"
+		    ,(select co.corp_name from corporation_cus co where co.corp_no=c.corp_no)		as	"corp_name"
+		    ,(select co.corp_business_area from corporation_cus co where co.corp_no=c.corp_no)	as	"corp_area"
+		    ,(select co.ceo_name from corporation_cus co where co.corp_no=c.corp_no)		as	"ceo_name"
+		    ,(select b.branch_name from code_branch b where b.branch_cd=c.branch_cd)			as	"branch_name"
+		from corp_order_info c where order_books_no=#{all_order_no}
+	</select>
+	
+	<select id="getReturnOrderCnt" resultType="int">
+		select count(*)
+		from (select 
+                r.return_sales_no "RETURN_SALES_NO",
+                r.order_no "ORDER_NO",
+                r.isbn13 "ISBN13",
+                r.return_sales_cd "RETURN_SALES_CD",
+                r.return_order_dt "RETURN_ORDER_DT",
+                r.return_comment "RETURN_COMMENT",  
+                c.return_name "RETURN_CAUSE",
+	            (select b.book_name from book b where b.isbn13=r.isbn13) "BOOK_NAME" 
+                from code_return c, return_sale_info r where c.return_cd = r.return_sales_cd)
+		where 1=1
+		<include refid="returnWhere" />
+	</select>
+	
+	
+	
+	<select id="getReturnOrderList" parameterType="com.group4.erp.ReturnSearchDTO" resultType="com.group4.erp.ReturnOrderDTO">
+        select * from(select zzz.*, rownum "RNUM" from(
+        	select
+				return_sales_no||'' "return_sales_no",
+				order_no||'' "order_no",
+				isbn13 "isbn13",
+				return_sales_cd "return_cd",
+				return_order_dt "return_dt",
+                return_comment "return_comment",  
+	            return_cause "return_cause",
+	            book_name "BOOK_NAME"
+			from (select 
+	                r.return_sales_no "RETURN_SALES_NO",
+	                r.order_no "ORDER_NO",
+	                r.isbn13 "ISBN13",
+	                r.return_sales_cd "RETURN_SALES_CD",
+	                r.return_order_dt "RETURN_ORDER_DT",
+                	r.return_comment "RETURN_COMMENT",   
+	                c.return_name "RETURN_CAUSE" ,
+	                (select b.book_name from book b where b.isbn13=r.isbn13) "BOOK_NAME"
+                from code_return c, return_sale_info r where c.return_cd = r.return_sales_cd)
+		where 1=1 
+		<include refid="returnWhere" />
+		<include refid="headerSort" />
+		 ) zzz  )
+		  where	1=1 <![CDATA[ and RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+		
+	</select>
+
+	<select id="getReturnContent" parameterType="int" resultType="com.group4.erp.ReturnSalseContentDTO">
+		select
+		    (select b.book_name from book b where b.isbn13=rs.isbn13)		"book_name"
+		    ,( select nvl(c.cus_id, c.cus_phone) from customer c where nvl(c.cus_id, c.cus_phone)=(select od.order_id from order_info od where od.order_no=rs.order_no) )		"id"
+		    ,to_char(rs.return_order_dt, 'YYYY-MM-DD (dy)')		"return_order_dt"
+		    ,rs.return_comment		"return_comment"
+		from return_sale_info rs where rs.return_sales_no=#{return_sales_no}
+	</select>
+
+
+    
+    <insert id="getSignUpBook" parameterType="com.group4.erp.InvenDTO">
+    	insert into book ( isbn13, book_name, cat_cd, book_price, book_pages, writer, publisher, size_cd, is_print, emp_no, published_dt, editor, reg_dt ) values
+    		( #{isbn13}, #{book_name}, #{cat_cd}, #{book_price}, #{book_pages}, #{writer}, #{publisher}, #{size_cd}, #{is_print}, (select emp_no from employee where emp_name=#{emp_name}), to_date(#{datepicker}, 'YYYY-MM-DD'), #{editor}, sysdate )
+    </insert>
+    
+    <insert id="getBookStock" parameterType="com.group4.erp.InvenDTO">
+    	insert into stock_info values (#{isbn13}, 0, 1 )
+    </insert>
+    
+    <select id="getBookInfo" parameterType="String" resultType="com.group4.erp.BookInfoDTO">
+    	select
+    		b.isbn13	"isbn13"
+    		,b.book_name	"book_name"
+    		,(select c.cat_name from code_category c where c.cat_cd=(select bk.cat_cd from book bk where bk.isbn13=b.isbn13))		"cat_name"
+    		,to_char(b.book_price,'999,999,999,999')	"book_price"
+    		,b.book_pages	"book_pages"
+    		,b.writer		"writer"
+    		,b.publisher	"publisher"
+    		,(select cs.size_name from code_book_size cs where cs.size_cd=(select bk.size_cd from book bk where bk.isbn13=b.isbn13))	"size_name"
+    		,b.is_print	"is_print"
+    		,to_char(b.published_dt, 'YYYY-MM-DD')	"published_dt"
+    		,(select e.emp_name from employee e where e.emp_no=(select bk.emp_no from book bk where bk.isbn13=b.isbn13)) "emp_name"
+    		,(select cb.branch_name from code_branch cb where cb.branch_cd=(select si.branch_cd from stock_info si where si.isbn13=b.isbn13)) "branch_name"
+    		,(select si.isbn_cnt from stock_info si where si.isbn13=b.isbn13) "isbn_cnt"
+    		,b.editor		"editor"
+    		from book b 
+    		where 1=1 
+    		and b.isbn13=#{isbn13_search}
+    </select>
+    
+    <update id="getBookInfoUpCnt" parameterType="com.group4.erp.BookInfoDTO">
+    	update book set
+    		book_name=#{book_name}
+    		,cat_cd=(select cat_cd from code_category where cat_name=#{cat_name})
+    		,book_price=#{book_price}
+    		,writer=#{writer}
+    		,publisher=#{publisher}
+    		,size_cd=(select size_cd from code_book_size where size_name=#{size_name})
+    		,is_print=#{is_print}
+    		,emp_no=(select emp_no from employee where emp_name=#{emp_name})
+    		,published_dt=#{published_dt}
+    		,editor=#{editor}
+    	where isbn13=#{isbn13}
+    </update>
+    <update id="getBranchUpCnt" parameterType="com.group4.erp.BookInfoDTO">
+    	update stock_info set
+    		branch_cd=(select branch_cd from code_branch where branch_name=#{branch_name})
+    		,isbn_cnt=#{isbn_cnt}
+    	where isbn13=#{isbn13}
+    </update>
+    
+    <select id="getOrderCnt" parameterType="String" resultType="int">
+    	select book_qty from order_info where order_no=#{all_order_no}
+    </select>
+    <select id="getOrderCnts" parameterType="String" resultType="int">
+    	select books_qty from corp_order_info where order_books_no=#{all_order_no}
+    </select>
+    <select id="getIsbnCnt" parameterType="String" resultType="int">
+    	select isbn_cnt from stock_info where isbn13=(select isbn13 from order_info where order_no=#{all_order_no})
+    </select>
+    <select id="getIsbnCnts" parameterType="String" resultType="int">
+    	select isbn_cnt from stock_info where isbn13=(select isbn13 from corp_order_info where order_books_no=#{all_order_no})
+    </select>
+    <update id="getReleaseUpCnt" parameterType="String">
+    	update release_info set release_dt=to_date(to_char(sysdate, 'YYYY-MM-DD'),'YYYY-MM-DD') where order_no=#{all_order_no}
+    </update>
+    <update id="getReleaseUpCnts" parameterType="String">
+    	update release_info set release_dt=to_date(to_char(sysdate, 'YYYY-MM-DD'),'YYYY-MM-DD') where order_books_no=#{all_order_no}
+    </update>
+    <update id="getIsbnCntUpdate" parameterType="String">
+    	update stock_info set isbn_cnt=isbn_cnt-(select book_qty from order_info where order_no=#{all_order_no}) where isbn13=(select isbn13 from order_info where order_no=#{all_order_no})
+    </update>
+    <update id="getIsbnCntUpdates" parameterType="String">
+    	update stock_info set isbn_cnt=isbn_cnt-(select books_qty from corp_order_info where order_books_no=#{all_order_no}) where isbn13=(select isbn13 from corp_order_info where order_books_no=#{all_order_no})
+    </update>
+
+</mapper>

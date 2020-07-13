@@ -1,0 +1,216 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.group4.erp.dao.MainDAO">
+	<!--==========-->
+	<!-- 월별 판매 부수 -->
+	<!--==========-->
+	<select id="selectSellingStat" resultType="com.group4.erp.CommonChartDTO">
+		select
+		    nvl(sum(o.book_qty),0) + (select nvl(sum(b.book_qty), 0) from buy_offline_info b where to_char(b.buy_dt, 'yy-mm') = d.month)  as "cnt"
+		    ,d.month "title"
+		from order_info o,
+		    (
+		            select to_char(sysdate, 'YY-MM') as "MONTH" from dual
+		            union
+		            select to_char(add_months(sysdate, -1), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -2), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -3), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -4), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -5), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -6), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -7), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -8), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -9), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -10), 'YY-MM') from dual
+		            union
+		            select to_char(add_months(sysdate, -11), 'YY-MM') from dual
+		    )d
+		where to_char(o.order_dt(+), 'yy-mm') = d.month
+		group by d.month
+		order by 2 asc
+	</select>
+	
+	<!--===========-->
+	<!-- 회원 나이대 분포 -->
+	<!--===========-->
+	<select id="selectAgeStat" resultType="com.group4.erp.CommonChartDTO">
+	<![CDATA[
+		select
+		    round(count(cus_no)*100/(select count(*) from customer where cus_birthday is not null), 0) as "cnt"
+		    ,case
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 10
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 20
+		        then '10대'
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 20
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 30
+		        then '20대'
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 30
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 40
+		        then '30대'
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 40
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 50
+		        then '40대'
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 50
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 60
+		        then '50대'
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 60
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 70
+		        then '60대'
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 70
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 80
+		        then '70대'
+		        when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 80
+		             and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 90
+		        then '80대'
+		     end as "title"
+		from customer
+		group by
+		      case
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 10
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 20
+		          then '10대'
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 20
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 30
+		          then '20대'
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 30
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 40
+		          then '30대'
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 40
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 50
+		          then '40대'
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 50
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 60
+		          then '50대'
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 60
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 70
+		          then '60대'
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 70
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 80
+		          then '70대'
+		          when to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) <= 80
+		               and to_number(to_char(sysdate, 'YYYY')) - to_number(substr(cus_birthday,1,4)) < 90
+		          then '80대'
+		       end
+		order by 2 asc
+		 ]]>
+	</select>
+	
+	
+	<!--===========-->
+	<!-- 이벤트 분포 정보 -->
+	<!--===========-->
+	<select id="selectEventStat" resultType="com.group4.erp.CommonChartDTO">
+		select
+		    round(count(e.evnt_cd)*100/(select count(*) from event_info where to_char(evnt_end_dt, 'yyyy') = to_char(sysdate-365, 'yyyy')), 0) as "cnt"
+		    ,c.event_type as "title"
+		from event_info e, code_event c
+		where c.event_cd = e.evnt_cd and to_char(e.evnt_end_dt, 'yyyy') = to_char(sysdate-365, 'yyyy')
+		group by c.event_type
+		order by count(e.evnt_cd) desc
+	</select>
+	
+	
+	<!--=======-->
+	<!-- 회원 성비 -->
+	<!--=======-->
+	<select id="selectGenderStat" resultType="com.group4.erp.CommonChartDTO">
+		select
+		    round(count(cus_no)*100/(select count(*) from customer where cus_gender is not null), 0) as "cnt"
+		    ,cus_gender as  "title"
+		 from customer
+		where cus_gender is not null
+		group by cus_gender
+	</select>
+	
+	<!--============-->
+	<!-- 어제 summary -->
+	<!--============-->
+	<select id="selectYesterdayStat" resultType="com.group4.erp.CommonChartDTO">
+		select
+		    (select count(*) from book where to_date(to_char(reg_dt, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(to_char(sysdate-1, 'YYYY-MM-DD'),'YYYY-MM-DD')) as "reg_cnt"
+		    ,(select count(*) from return_sale_info where to_date(to_char(return_order_dt, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(to_char(sysdate-1, 'YYYY-MM-DD'),'YYYY-MM-DD')) as "return_cnt"
+		    ,(select count(*) from order_info where to_date(to_char(order_dt, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(to_char(sysdate-1, 'YYYY-MM-DD'),'YYYY-MM-DD')) as "order_cnt"
+		    ,(select count(*) from corp_order_info where to_date(to_char(order_dt, 'YYYY-MM-DD'), 'YYYY-MM-DD') = to_date(to_char(sysdate-1, 'YYYY-MM-DD'),'YYYY-MM-DD')) as "corp_order_cnt"
+		from dual;
+	</select>
+	
+	<!--==============-->
+	<!-- 이번달 이벤트 text -->
+	<!--==============-->
+	<select id="selectMonthEvnt" resultType="java.util.HashMap">
+	select m.*, rownum 
+	from (
+			select
+			    (select c.event_type from code_event c where c.event_cd = evnt_cd)  as "event_type"
+			    ,evnt_title as "evnt_title"
+			    ,evnt_start_dt as "evnt_start_dt"
+			    ,evnt_end_dt as "evnt_end_dt"
+			    ,to_char(evnt_start_dt, 'YYYYMM')
+			    ,to_char(sysdate, 'YYYYMM')
+			from event_info
+			where ( to_date(to_char(sysdate, 'YYMM'), 'yymm') between to_date(to_char(evnt_start_dt, 'YYMM'), 'yymm') and to_date(to_char(evnt_end_dt, 'YYMM'), 'yymm') ) and evnt_end_dt >= sysdate
+			and evnt_state_cd != 0
+			order by  tot_est_cost desc, evnt_start_dt asc, evnt_end_dt desc
+	)m where rownum &lt;= 6
+</select>
+	
+	<!--==================-->
+	<!-- 판매율 progress bar -->
+	<!--==================-->
+	<select id="selectOrder" resultType="com.group4.erp.CommonChartDTO">
+		<!-- select
+		    round((nvl(sum(book_qty),0) + (select nvl(sum(b.book_qty), 0) from buy_offline_info b where to_char(b.buy_dt,'YYYYMM') = to_char(sysdate,'YYYYMM')))/30000*100, 1) as "cnt"
+		    ,to_char(order_dt, 'yy.mm') "title"
+		from order_info
+		where order_no not in (select order_no from return_sale_info) and to_char(order_dt,'YYYYMM') = to_char(sysdate,'YYYYMM')
+		group by to_char(order_dt, 'yy.mm') -->
+		
+		select
+			80 as "cnt"
+			,'2020-02' as "title"
+		from dual
+
+	</select>
+	
+	<!--==================-->
+	<!-- 반품율 progress bar -->
+	<!--==================-->
+	<select id="selectReturn" resultType="com.group4.erp.CommonChartDTO">
+		<!-- select
+		    round(sum(return_qty)/3000*100,1) as "cnt"
+		    ,to_char(return_order_dt, 'YY.MM') as "title"
+		from return_sale_info
+		where to_char(return_order_dt,'YYYYMM') = to_char(sysdate,'YYYYMM')
+		group by to_char(return_order_dt, 'YY.MM') -->
+		
+		select
+			35 as "cnt"
+			,'2020-02' as "title"
+		from dual
+	</select>
+	
+	<!--==================-->
+	<!-- 베스트 셀러 -->
+	<!--==================-->
+	<select id="getBestSellers" resultType="HashMap">
+      select * from (
+          select rownum "RNUM", zxcv.* from(
+              select o.isbn13 "isbn13",
+              (select b.book_name from book b where b.isbn13=o.isbn13) "book_name",
+              (select c.cat_name from code_category c where c.cat_cd in(select b.cat_cd from book b where b.isbn13=o.isbn13)) "cat_name",
+              count(*) "soldcnt" from order_info o where to_char(o.order_dt,'yymm')= to_char(add_months(sysdate, -1),'yymm') group by o.isbn13 order by "soldcnt" desc)
+          zxcv where rownum &lt;= 5)
+   </select>
+	
+	
+	
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:p="http://www.springframework.org/schema/p"
+	xmlns:tx="http://www.springframework.org/schema/tx"   
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc 
+    	http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+        http://www.springframework.org/schema/beans 
+        http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+        http://www.springframework.org/schema/context 
+        http://www.springframework.org/schema/context/spring-context-3.0.xsd
+        http://www.springframework.org/schema/tx
+        http://www.springframework.org/schema/tx/spring-tx-3.0.xsd">	
+	
+	<!--**********************************************************************************************-->
+	<!-- [DB 정보와 커넥션풀을 관리하는 BasicDataSource 객체] 등록하기 -->
+	<!--**********************************************************************************************-->
+	<!--**********************************************************************************************-->
+	<!-- [BasicDataSource 객체]와 [MyBatis SQL 설정 XML 파일의 쿼리 로그 출력]을 관리하는 [Log4jdbcProxyDataSource 객체] 등록하기 -->
+	<!-- 	[생성자 매개변수]에 [BasicDataSource 객체]를 전달한다. -->
+	<!-- 	[속성변수 logFormatter]에 [Log4JdbcCustomFormatter 객체]를 생성해 저장한다. -->
+	<!--**********************************************************************************************-->
+	<!--**********************************************************************************************-->
+	<!-- [트랜잭션]을 관리하는 [DataSourceTransactionManager 객체] 등록하기 -->
+	<!-- 	[속성변수 dataSource]에 [Log4jdbcProxyDataSource 객체]를 저장한다. -->
+	<!-- 		[Log4jdbcProxyDataSource 객체]가 없을 경우 [BasicDataSource 객체]를 [속성변수 dataSource]에 저장한다 -->
+	<!--**********************************************************************************************-->
+	<!--**********************************************************************************************-->
+	<!-- [MyBatis SQL 설정 XML 파일]을 관리하는 [SqlSessionFactoryBean 객체] 등록하기 -->
+	<!-- 	[속성변수 dataSource]에 [Log4jdbcProxyDataSource 객체]를 저장한다. -->
+	<!-- 		[Log4jdbcProxyDataSource 객체]가 없을 경우 [BasicDataSource 객체]를 [속성변수 dataSource]에 저장한다 -->
+	<!-- 	[속성변수 mapperLocations]에 [MyBatis SQL 설정 XML 파일]의 경로를 저장한다. -->
+	<!--**********************************************************************************************-->
+	<bean id="basicDataSource"  class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+        	<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+        	
+	        <property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:XE" />
+	        <property name="username" value="book" />
+	        <property name="password" value="b123" />
+			<!--
+	        <property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:XE" />
+	        <property name="username" value="bookstreet" />
+	        <property name="password" value="b123" />
+	        -->
+	</bean>		
+	<bean id="log4jdbcProxyDataSource" class="net.sf.log4jdbc.Log4jdbcProxyDataSource">
+		<constructor-arg ref="basicDataSource" />
+		<property name="logFormatter">
+			<bean class="net.sf.log4jdbc.tools.Log4JdbcCustomFormatter">
+				<property name="loggingType" value="MULTI_LINE" />
+				<property name="sqlPrefix" value="SQL :  ------------------------------->"/>
+			</bean>
+		</property>
+	</bean>	
+	<bean  id="transactionManager"  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+		<property  name="dataSource"  ref="log4jdbcProxyDataSource"/>
+	</bean>		
+	<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="dataSource" ref="log4jdbcProxyDataSource"/>
+		<property name="mapperLocations" value="classpath:com/group4/*/*.xml"/>		
+	</bean> 
+			 
+	<!--**********************************************************************************************-->
+	<!-- [MyBatis SQL 설정 XML 파일]에 존재하는 SQL 구문을 실행하여 DB 연동을 하는 [SqlSessionTemplate 객체] 등록하기 -->
+	<!-- 	[생성자 매개변수]에 [SqlSessionFactoryBean 객체]를 전달한다. -->
+	<!--**********************************************************************************************-->
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg ref="sqlSessionFactory"/>
+	</bean> 
+	
+	<!--**********************************************************************************************-->
+	<!-- [DAO 인터페이스]와 [MyBatis SQL 설정 XML 파일]의 구조가 일치하는지 검사하는 [MapperScannerConfigurer 객체] 등록하기 -->
+	<!--**********************************************************************************************-->
+	<!-- 	[속성변수 sqlSessionFactoryBeanName]에 [MyBatis SQL 설정 XML 파일]을 관리하는 [SqlSessionFactoryBean 객체]를 저장한다. -->
+	<!-- 	[속성변수 basePackage]에 [DAO 인터페이스]만 저장된 패키지 경로를 저장한다.-->
+	<!--			<주의>만약 지정한 패키지에  [DAO 인터페이스]가 아닌 것도 함께 저장되어 있으면 에러가 발생생한다.-->
+	<!--			      만약 지정한 패키지에  [DAO 인터페이스]가 아닌 것도 함께 저장되어 있다면 -->
+	<!--                  [MapperScannerConfigurer 객체] 등록을  아에 하지 말던가 또는 가짜 패키지를 지정한다..-->
+	<!--                  [속성변수 sqlSessionFactoryBeanName]는 등록하고 [속성변수 basePackage]를 생략해도 에러가  발생한다,-->
+	<!--**********************************************************************************************-->
+	 <bean class="org.mybatis.spring.mapper.MapperScannerConfigurer">
+		<property name="sqlSessionFactoryBeanName" value="sqlSessionFactory" />
+	    <property name="basePackage" value="com.group4.erp.dao.dao" />
+	    <!-- <property name="basePackage" value="com.group4.common.dao.dao" /> -->
+	</bean> 	
+</beans>
+		
+	<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- 만약 로깅에 SQL 구문을 찍고 싶지 않으면 위의 -->
+	<!-- [BasicDataSource, Log4jdbcProxyDataSource, DataSourceTransactionManager, SqlSessionFactoryBean] 객체를 아래 처럼 등록한다.-->
+	<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->			
+			<!--**********************************************************************************************-->
+			<!-- [DB 정보와 커넥션풀을 관리하는 BasicDataSource 객체] 등록하기 -->
+			<!--**********************************************************************************************-->
+			<!--**********************************************************************************************-->
+			<!-- [트랜잭션]을 관리하는 [DataSourceTransactionManager 객체] 등록하기 -->
+			<!-- 	[속성변수 dataSource]에 [BasicDataSource 객체]를 저장한다 -->
+			<!--**********************************************************************************************-->
+			<!--**********************************************************************************************-->
+			<!-- [MyBatis SQL 설정 XML 파일]을 관리하는 [SqlSessionFactoryBean 객체] 등록하기 -->
+			<!-- 	[속성변수 dataSource]에 [BasicDataSource 객체]를 저장한다 -->
+			<!-- 	[속성변수 mapperLocations]에 [MyBatis SQL 설정 XML 파일]의 경로를 저장한다. -->
+			<!--**********************************************************************************************-->
+			<!-- 
+			<bean  id="basicDataSource"  class="org.apache.commons.dbcp2.BasicDataSource" destroy-method="close">
+			        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+			        <property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:XE" />
+			        <property name="username" value="system" />
+			        <property name="password" value="123" />
+			</bean>			
+			<bean  id="transactionManager"  class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+				<property  name="dataSource"  ref="basicDataSource"/>
+			</bean>
+			<bean id="sqlSessionFactory" class="org.mybatis.spring.SqlSessionFactoryBean">
+				<property name="dataSource" ref="basicDataSource"/>
+				<property name="mapperLocations" value="classpath:com/naver/erp/*.xml"/>		
+			</bean> 
+			 -->
+	<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+	<!-- 아래 처럼 BasicDataSource 객체 대신 DriverManagerDataSource 객체를 선언하면 Connecion 풀 기법이 빠진다.-->
+	<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->	
+			 <!--
+			 <bean  id="driverManagerDataSource"  class="org.springframework.jdbc.datasource.DriverManagerDataSource" >
+			        <property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+			        <property name="url" value="jdbc:oracle:thin:@127.0.0.1:1521:XE" />
+			        <property name="username" value="system" />
+			        <property name="password" value="123" />
+			</bean>  
+			-->

@@ -1,0 +1,169 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.group4.erp.dao.WarehousingDAO">
+
+	 <sql id="warehousingList">
+	 
+	 	<if test="wh_loc and wh_loc">
+		and
+	      <foreach collection="wh_loc" item="loc" open="(" separator="or" close=")">
+	          <if test="loc==1">
+	              (   (select branch_cd from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no)) = ${loc}   )
+	          </if>
+	          <if test="loc==2">
+	              (   (select branch_cd from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no)) = ${loc}   )
+	          </if>
+	          <if test="loc==3">
+	          	(   (select branch_cd from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no)) = ${loc}   )
+	          </if>
+	          <if test="loc==4">
+	          	(   (select branch_cd from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no)) = ${loc}   )
+	          </if>
+	          <if test="loc==5">
+	          	(   (select branch_cd from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no)) = ${loc}   )
+	          </if>
+	          <if test="loc==6">
+	          	(   (select branch_cd from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no)) = ${loc}   )
+	          </if>
+	          <if test="loc==7">
+	          	(   (select branch_cd from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no)) = ${loc}   )
+	          </if> 
+	      </foreach>
+		</if> 
+		
+		
+		
+		
+		<if test="searchToday!=null and searchToday.length()>0">
+				and ( to_char(wh_dt,'YYYY-MM-DD') = to_char(sysdate, 'YYYY-MM-DD') )
+		</if>
+		
+		
+ 		<if test="(dateFrom!=null and dateFrom.length()>0)  or  (dateTill!=null and dateTill.length()>0)">
+	 		and( 
+	 	</if>
+	 		
+	 	<if test="((dateFrom!=null and dateFrom.length()>0) and (dateTill==null or dateTill.length()==0))">
+	 		w.wh_dt &gt;= to_date( #{dateFrom}, 'YYYY-MM-DD') 
+	 	</if>
+	 	
+	 	<if test="(dateTill!=null and dateTill.length()>0 ) and (dateFrom==null or dateFrom.length()==0)">
+	 		w.wh_dt &lt;= to_date( #{dateTill}, 'YYYY-MM-DD') 
+	 	</if>
+	 	
+	 	<if test="(dateFrom!=null and dateFrom.length()>0)and (dateTill != null and dateTill.length()>0)">
+	 		( w.wh_dt &gt;= to_date( #{dateFrom}, 'YYYY-MM-DD') )  and ( w.wh_dt &lt;= to_date( #{dateTill}, 'YYYY-MM-DD') ) 
+	 	</if>
+	 	
+	 	<if test="(dateFrom != null and dateFrom.length()>0)  or  (dateTill != null and dateTill.length()>0)">
+	 		) 
+	 	</if> 	
+	 	
+		
+		<if test="searchPublisher!=null and searchPublisher.length()>0">
+			 	and
+		 		 ( (select publisher from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)  ) = #{searchPublisher} )
+		</if>
+		
+	
+		<if test="wh_keyword!=null and wh_keyword.length()>0 ">
+	      and(
+
+              upper((select emp_name from employee where emp_no = (select emp_no from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)))) like upper('%${wh_keyword}%')
+              or upper((select order_stock_cnt from books_inven_order_info where order_inven_no = w.order_inven_no )) like upper('%${wh_keyword}%')
+              or upper((select supply_rate from books_inven_order_info where order_inven_no = w.order_inven_no )) like upper('%${wh_keyword}%')
+              or upper((select cost from books_inven_order_info where order_inven_no = w.order_inven_no)) like upper('%${wh_keyword}%')
+              or upper((select to_char(order_dt,'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') from books_inven_order_info where order_inven_no = w.order_inven_no)) like upper ('%${wh_keyword}%')
+              or upper((select branch_name from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no))) like upper('%${wh_keyword}%')
+              or upper((select to_char(store_req_dt,'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') from books_inven_order_info where order_inven_no = w.order_inven_no)) like upper('%${wh_keyword}%')
+              or upper((select book_name from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)  )) like upper('%${wh_keyword}%')
+              or upper((select publisher from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)  )) like upper('%${wh_keyword}%')
+              or upper((select cat_name from CODE_CATEGORY where cat_cd = (select cat_cd from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no )) )) like upper('%${wh_keyword}%')
+              or upper(to_char(w.wh_dt,'YYYY-MM-DD (DY)', 'NLS_DATE_LANGUAGE=KOREAN')) like upper('%${wh_keyword}%')
+              or upper(w.wh_no) like upper('%${wh_keyword}%')
+              or upper(w.order_inven_no) like upper('%${wh_keyword}%')
+              or upper((select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)) like upper('%${wh_keyword}%')
+         )
+
+
+		</if>
+		
+	</sql> 
+    
+	<select id="getWarehousingListCnt" parameterType="com.group4.erp.WarehousingSearchDTO" resultType="int">
+		select count(*) from warehousing_info w where 1=1 <include refid="warehousingList"></include>
+	</select>
+	 
+	<select id='getWarehousingList' parameterType="com.group4.erp.WarehousingSearchDTO" resultType="java.util.HashMap">
+		select * from(select zzz.*, rownum RNUM from(
+			select 
+			      to_char(wh_dt,'YYYY-MM-DD (DY)', 'NLS_DATE_LANGUAGE=KOREAN') as "wh_dt"
+			      ,wh_no||'' as "wh_no"
+			      ,order_inven_no||'' as "order_inven_no"
+			      ,(select emp_name from employee where emp_no = (select emp_no from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no))) as "emp_name"
+			      ,(select to_char(order_dt,'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') from books_inven_order_info where order_inven_no = w.order_inven_no)||''  as "order_dt" 
+    			  ,(select order_stock_cnt from books_inven_order_info where order_inven_no = w.order_inven_no )||''  as "order_stock_cnt"  
+    			  ,(select cost from books_inven_order_info where order_inven_no = w.order_inven_no)||'' as "cost"
+    			  ,(select supply_rate from books_inven_order_info where order_inven_no = w.order_inven_no )||''  as "supply_rate"
+    		      ,(select to_char(store_req_dt,'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') from books_inven_order_info where order_inven_no = w.order_inven_no)||'' as "store_req_dt" 
+    			  ,(select branch_name from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no))||''  as "branch_name"  
+    			  ,(select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no) as "isbn"
+    			  ,(select book_name from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)  ) as "book_name"
+    			  ,(select publisher from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)  ) as "book_publisher" 
+    			  ,(select cat_name from CODE_CATEGORY where cat_cd = (select cat_cd from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no )) ) as "cat_name"     		
+			from warehousing_info w
+			where 1=1 <include refid="warehousingList"></include>  
+			<if test="sort!=null and sort.length()>0">
+	 			order by ${sort}
+	 		</if>
+	 		<if test="sort==null or sort.length()==0">
+	 			order by wh_dt desc
+	 		</if>
+		) zzz ) where <![CDATA[ RNUM>=${selectPageNo*rowCntPerPage-rowCntPerPage+1} and RNUM<=${selectPageNo*rowCntPerPage} ]]>
+	</select>
+	
+	<select id="getPublisherList" parameterType="com.group4.erp.WarehousingSearchDTO" resultType="java.util.HashMap">
+		select distinct publisher as "publisher" from book
+	</select>
+	
+	<select id="getBranch" parameterType="com.group4.erp.WarehousingSearchDTO" resultType="java.util.HashMap">
+		select branch_name as "branch" from code_branch
+	</select>
+	
+	
+	
+	<select id="warehContent" parameterType="String" resultType="com.group4.erp.WarehousingSearchDTO">
+		select 
+            (select emp_name from employee where emp_no = (select emp_no from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no))) as "emp_name" 
+            ,(select to_char(order_dt,'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') from books_inven_order_info where order_inven_no = w.order_inven_no)||''  as "order_dt" 
+            ,to_char((select order_stock_cnt from books_inven_order_info where order_inven_no = w.order_inven_no ),'999,999,999')  as "order_stock_cnt"  
+            ,to_char((select cost from books_inven_order_info where order_inven_no = w.order_inven_no),'999,999,999,999') as "cost"
+            ,(select supply_rate from books_inven_order_info where order_inven_no = w.order_inven_no )||''  as "supply_rate"
+            ,(select to_char(store_req_dt,'YYYY-MM-DD DY', 'NLS_DATE_LANGUAGE=KOREAN') from books_inven_order_info where order_inven_no = w.order_inven_no)||'' as "store_req_dt" 
+            ,(select branch_name from code_branch where branch_cd = (select branch_cd from books_inven_order_info where order_inven_no = w.order_inven_no))||''  as "branch_name"  
+            ,(select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no) as "isbn"
+            ,(select book_name from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)  ) as "book_name"
+            ,(select publisher from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no)  ) as "book_publisher" 
+            ,(select cat_name from CODE_CATEGORY where cat_cd = (select cat_cd from book where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = w.order_inven_no )) ) as "cat_name"
+        from warehousing_info w
+		where w.order_inven_no = #{order_inven_no}
+	</select>
+	
+	
+	<update id="whStockCnt" parameterType="int">
+		update stock_info 
+       	set isbn_cnt = (isbn_cnt + (select order_stock_cnt from books_inven_order_info where order_inven_no = (select order_inven_no from warehousing_info where wh_no = #{wh_no}))) 
+		where isbn13 = (select isbn13 from books_inven_order_info where order_inven_no = (select order_inven_no from warehousing_info where wh_no = #{wh_no}))
+	</update>
+	
+	
+	<update id="whConfirmCnt" parameterType="int">
+       	update warehousing_info 
+       	set wh_dt = sysdate
+		where wh_no = #{wh_no} 
+	</update>
+	
+
+    
+</mapper>

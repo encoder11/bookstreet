@@ -1,0 +1,153 @@
+@charset "UTF-8";
+   
+@import url('https://fonts.googleapis.com/css?family=Noto+Sans+KR:100,200,300,350,400,500,600,700,800,900&display=swap');
+
+body {
+      /* background: #EBFBFF; */   
+      background: white;
+      font-family: 'Noto Sans KR', sans-serif;
+}
+
+.tab, .tab td, .tab th{
+   border-collapse: collapse;
+   padding:5px;
+   border-top:1px solid white;
+   border-bottom:1px solid white;
+   border-left:0px;
+   border-right:0px;
+   font-size:13pt;
+   font-family: 'Noto Sans KR', sans-serif;
+   /* background-color: white; */
+/*    font-weight:350; */
+   /*text-align: right;*/
+}
+
+.tab2, .tab2 td, .tab2 th{
+   border-collapse: collapse;
+   border:1px solid #ddd;
+   padding:5px;
+   font-size:13pt;
+   font-family: 'Noto Sans KR', sans-serif;
+}
+
+.tab3{
+   border-collapse: collapse;
+   border:0px solid white;
+   padding:5px;
+   font-size:13pt;
+   font-family: 'Noto Sans KR', sans-serif;
+}
+.logintab{
+   border-collapse: collapse;
+   padding:5px;
+   border-top:1px solid #C0C0C0;
+   border-bottom:1px solid #C0C0C0;
+   border-left:0px;
+   border-right:0px;
+   font-size:12pt;
+   font-family: 'Noto Sans KR', sans-serif;
+}
+
+.thset{
+   font-size:10pt;
+   color : white;
+   
+}
+td{
+   font-weight:380; 
+   
+}
+
+th{
+   
+   font-weight: 450; 
+   font-size:13pt ;
+}
+.fontLight{
+   
+   font-family: 'Noto Sans KR', sans-serif;
+   font-weight: 350; 
+   font-size: 11pt ;
+   
+}
+.fontNormal{
+   font-family: 'Noto Sans KR', sans-serif;
+   font-weight: 410; 
+   font-size: 13pt ;
+   color : #666666;
+   
+}
+.fontBold{
+   font-family: 'Noto Sans KR', sans-serif;
+   font-weight: 700;
+   font-size: 11pt ;
+}
+
+h1{
+   font-family: 'Noto Sans KR', sans-serif;
+   font-weight: 600;
+   font-size: 16pt ;
+}
+
+
+.button {
+    /*float:right;
+    background-color:#fbfbfb;*/
+    background-color: #4CAF50;
+    border-radius: 5px;
+    align-items: center; 
+    margin-left: 7px;
+    height: 22px;
+    line-height: 22px;
+    text-align:center;
+    border:1px solid #b7b7b7;
+    cursor:pointer;
+    display:inline-block;
+    color: black;
+    font-family: 'Noto Sans KR', sans-serif;
+   font-weight: 500; 
+   font-size:9pt;
+}
+
+
+
+
+
+/* button{
+  background:gray;
+  color:#fff;
+  border:none;
+  position:relative;
+  height:25px;
+  font-size:9pt;
+  padding:0 2em;
+  cursor:pointer;
+  transition:800ms ease all;
+  outline:none;
+  vertical-align:middle;
+}
+button:hover{
+  background:#fff;
+  color:#1AAB8A;
+}
+button:before,button:after{
+  content:'';
+  position:absolute;
+  top:0;
+  right:0;
+  height:2px;
+  width:0;
+  background: #1AAB8A;
+  transition:400ms ease all;
+}
+button:after{
+  right:inherit;
+  top:inherit;
+  left:0;
+  bottom:0;
+}
+button:hover:before,button:hover:after{
+  width:100%;
+  transition:800ms ease all;
+} */
+

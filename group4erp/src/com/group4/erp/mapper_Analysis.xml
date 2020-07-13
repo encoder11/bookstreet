@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<!-- mapper 태그 선언 -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+   <!-- namespace 속성값으로 [DAO 인터페이스명]이 오며 -->
+   <!-- [DAO 인터페이스] 메소드명과 동일한 id 값을 소유한 태그를 내포하고 있다. -->
+<!--mmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmmm-->
+<mapper namespace="com.group4.erp.dao.AnalysisDAO">
+   
+   <sql id="bestKwdWhere">
+      <if test="rank !=null">
+            and 
+               rownum&lt;=#{rank}
+                  
+      </if>
+      <if test="rank==null">
+         and rownum&lt;=10
+      
+      </if>
+      
+   </sql> 
+   
+   <select id="getBestKwdList" parameterType="com.group4.erp.BestKwdSearchDTO" resultType="com.group4.erp.BestKwdDTO">
+   select * from (select zzz.*, rownum RNUM from (
+      select rownum "rank", 
+            srch_kwd "srch_kwd", 
+            kwd_cnt "kwd_cnt" 
+      from 
+         (
+            select srch_key "SRCH_KWD", count(*) "KWD_CNT" from keyword
+            group by srch_key order by 2 desc
+         )
+      where 1=1
+      <include refid="bestKwdWhere" />
+   ) zzz)
+   </select>
+   
+   <select id="getKeywdSrchCntChart" resultType="com.group4.erp.BestKwdDTO">
+      select 
+         count(*) "kwd_cnt",
+         to_char(srch_dt, 'yy.mm.dd') "date" 
+      from keyword 
+            where srch_dt >= to_date('20190101', 'yyyymmdd')
+            group by to_char(srch_dt, 'yy.mm.dd')
+            order by 2 
+   </select>
+   
+   
+   <select id="getBestKwdListChart" parameterType="com.group4.erp.BestKwdSearchDTO" resultType="com.group4.erp.BestKwdDTO">
+      select rownum "rank", 
+            srch_kwd "srch_kwd", 
+            kwd_cnt "kwd_cnt" 
+      from 
+         (
+            select srch_key "SRCH_KWD", count(*) "KWD_CNT" from keyword
+            group by srch_key order by 2 desc
+         )
+      where 1=1
+      <include refid="bestKwdWhere" />
+   </select>
+   
+   <select id="getMonthlyBookRegChart" resultType="com.group4.erp.ChartDTO">
+      select 
+          (extract(year from sysdate)-1)||c.month_cd "dt",
+          (select count(*) from book b where to_char(b.reg_dt, 'yyyymm')= (extract(year from sysdate)-1)||c.month_cd) "cnt"
+        from code_month c order by c.month_cd
+   </select>
+   
+   <select id="getBookCategoryList" resultType="com.group4.erp.ChartDTO">   
+      select
+         cat_cd "cat_cd",
+         cat_name "cat_name"
+      from code_category
+   </select>
+   
+   <select id="getCategoryRegChart" parameterType="String" resultType="com.group4.erp.ChartDTO">
+      
+      select 
+          (extract(year from sysdate)-1)||c.month_cd "dt",
+          (select count(*) from book b where to_char(b.reg_dt, 'yyyymm')= (extract(year from sysdate)-1)||c.month_cd and b.cat_cd=#{cat_cd}) "cnt"  
+         from code_month c order by c.month_cd
+   </select>
+   
+   <select id="getEmployeeCntChart" resultType="com.group4.erp.ChartDTO">
+      select       
+            (select c.jikup from code_jikup c where c.jikup_cd = e.jikup_cd) "jikup", 
+            nvl(count(*), 0) "cnt"
+        from employee e  
+        where e.EMP_RESIGN_DATE is null
+    group by e.jikup_cd
+    order by e.jikup_cd
+   </select>
+   
+   <select id="getEmpHireOrResignChart" resultType="com.group4.erp.ChartDTO">
+      select                                                                                                                               
+         (extract(year from sysdate)-1)||c.month_cd "dt", 
+         (select count(*) from employee e) "tot_cnt",   
+         nvl( (select count(*) from employee e where to_char(e.hire_dt, 'yyyymm')=(extract(year from sysdate)-1)||c.month_cd), 0) "hire_cnt",  
+         nvl( (select count(*) from employee e where to_char(e.emp_resign_date, 'yyyymm')=(extract(year from sysdate)-1)||c.month_cd), 0) "resign_cnt"         
+        from code_month c
+   </select>
+   
+   
+   <select id="getCatInventoryChart" resultType="com.group4.erp.ChartDTO">
+      select
+          (select cc.cat_name from code_category cc where cc.cat_cd=c.cat_cd)  "cat_name",
+          nvl((select count(*) from book b where b.cat_cd=c.cat_cd), 0) "cnt"
+       from code_category c, book b
+       where b.cat_cd = c.cat_cd(+)
+       group by c.cat_cd(+)
+       order by c.cat_cd
+   </select>
+   
+      
+</mapper>
