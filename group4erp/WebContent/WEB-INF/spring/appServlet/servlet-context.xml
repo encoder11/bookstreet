@@ -31,6 +31,8 @@
 	<resources mapping="/resources/img/**" location="/WEB-INF/resources/img/" />
 	<resources mapping="/resources/css/**" location="/WEB-INF/resources/css/" />
 	
+	<!-- <resources mapping="/views/**" location="/WEB-INF/views/" /> -->
+	
 	<!--****************************************************************************************-->
 	<!--파일업 로드를 관리하는 [CommonsMultipartResolver 객체] 정보 등록  -->
 	<!--****************************************************************************************-->
