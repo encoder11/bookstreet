@@ -1,7 +1,26 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
     pageEncoding="UTF-8"%>
-    
 
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+
+<%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+
+
+<c:set var="ctRoot" value="/group4erp" />
+
+<c:set var="ctRootImage" value="${ctRoot}/resources/image"/>
+<c:set var="ctRootImg" value="${ctRoot}/resources/img"/>
+<c:set var="ctRootcss" value="${ctRoot}/resources/css"/>
+<c:set var="ctRootlib" value="${ctRoot}/resources/lib"/>
+
+
+<!-- css 파일 & jquery 라이브러리 파일 수입 -->
+<!-- <link href="${pageContext.request.contextPath}/resources/test.css?ver=1" rel="stylesheet" type="text/css"> -->
+<!-- <link href="${ctRoot}/resources/common.css" rel="stylesheet" type="text/css"> -->
+<link href="/group4erp/resources/test.css?ver=1" rel="stylesheet" type="text/css">
+<link href="/group4erp/resources/component.css" rel="stylesheet" type="text/css">
+<script src = "${ctRoot}/resources/jquery-1.11.0.min.js" type="text/javascript"></script>
+<script src = "${ctRoot}/resources/common.js?ver=1"></script>
 <link href="${ctRootImg}/favicon.png" rel="icon">
 <link href="${ctRootImg}/apple-touch-icon.png" rel="apple-touch-icon">
 
@@ -30,13 +49,3 @@
   <!--common script for all pages-->
   <script src="${ctRootlib}/common-scripts.js"></script>
   <!--script for this page-->
-<!DOCTYPE html>
-<html>
-<head>
-<meta charset="UTF-8">
-<title>Insert title here</title>
-</head>
-<body>
-
-</body>
-</html>
