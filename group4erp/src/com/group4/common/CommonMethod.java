@@ -14,6 +14,7 @@ public class CommonMethod {
 	private SqlSessionTemplate sqlSession;
 	
 	/*
+	 * @test
 	 * 자사의 지역 위치를 가져오는 메소드
 	 * 코드 데이터 형식이다.
 	 */
