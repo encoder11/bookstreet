@@ -5,18 +5,10 @@ import java.util.Map;
 
 import org.mybatis.spring.SqlSessionTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.stereotype.Repository;
-
-import com.group4.erp.InvenSearchDTO;
-import com.group4.erp.service.InvenService;
 
 
 
 public class CommonMethod {
-	
-	@Autowired
-	InvenService invenService;
 	
 	@Autowired
 	private SqlSessionTemplate sqlSession;
