@@ -177,21 +177,14 @@ $(document).ready(function(){
         <ul class="nav top-menu">
           <!-- settings start -->
           <!-- notification dropdown end -->
-          <li><!-- 
-            <table>
-               <tr>
-                  <td align="left"> <font style="color:#D8E8E4;"><h4><span id="nowTime" align="right"></span> </h4></font></td>
-               </tr>
-            </table> -->
+          <li>
           </li>
         </ul>
         <!--  notification end -->
       </div>
       <div class="top-menu">
         <ul class="nav pull-right top-menu">
-          <!-- <li>
-            <a class="goBackss" href="javascript:goBack();">뒤로 가기</a>
-          </li> -->
+
           <li>
              <a class="logout" href="/group4erp/logout.do">Logout</a>
           </li>
@@ -199,9 +192,7 @@ $(document).ready(function(){
       </div>
       <div class="top-menu">
         <ul class="nav pull-right top-menu">
-          <!-- <li>
-            <a class="goBackss" href="javascript:goBack();">뒤로 가기</a>
-          </li> -->
+
           <li style="margin-top: 10px; margin-right: 20px;">
              <font style="color:#D8E8E4;"><h4><span id="nowTime" align="right"></span> </h4></font>
           </li>
@@ -240,12 +231,6 @@ $(document).ready(function(){
               <li>
                 <a href="/group4erp/businessTripList.do"><i class="fa fa-briefcase"></i>출장 신청</a>
               </li>
-              <!-- 
-              <li>
-                <a href="/group4erp/goMyWorkTime.do"><i class="fa fa-list"></i>근태 조회</a>
-              </li>
-              <li>
-               -->
               <li>
                 <a href="/group4erp/viewApprovalList.do"><i class="fa fa-pencil"></i>문서 결재</a>
               </li>
@@ -300,11 +285,6 @@ $(document).ready(function(){
               <li class="active">
               	<a href="/group4erp/viewEmpSalInfo.do"><i class="fa fa-file"></i>급여명세서 조회</a>
               </li>
-              <!-- 
-              <li>
-                <a href="/group4erp/viewEmpWorkStateList.do"><i class="fa fa-list"></i>직원별 근무현황</a>
-              </li>
-               -->
               <li>
                 <a href="/group4erp/viewEmpDayOffList.do"><i class="fa fa-list"></i>직원별 휴가 현황</a>
               </li>
@@ -365,7 +345,6 @@ $(document).ready(function(){
               <h4><i class="fa fa-angle-right"></i> 검색</h4>
               <hr>
 		<form name="book_inventory_search_form" method="post" action="/group4erp/goBookList.do">
-			<!-- <div class="divcss"> -->
 			<table class="searchTable" style="border: 0px;">
 				<tr>
 					<th width="8%" style="text-align:right;"><b>* 분야&nbsp;</b></th>
@@ -412,13 +391,6 @@ $(document).ready(function(){
 			</table>
 
 			<br>
-			<!-- 
-			<input type="image" src="/group4erp/resources/image/magnifying-glass.png" width="20" height="20" value="검색" onclick="goSearchBookInven();">  
-			<a href="javascript:goSearchBookInven();">검색</a>&nbsp;&nbsp;
-			<input type="button" value="모두검색" onclick="goAllSearchBookInven();">&nbsp;&nbsp;
-			<input type="button" value="초기화" onclick="goAllReset();">
- 			-->
-			<!-- </div> -->
 			
 			<input type="hidden" name="selectPageNo">
 			<input type="hidden" name="rowCntPerPage" value="${invenSearchDTO.rowCntPerPage}">
@@ -596,7 +568,7 @@ $(document).ready(function(){
 								<td align=center>${book.book_price}
 								<td align=center>${book.book_cnt}
 								<td align=center>${book.branch_name}
-					</c:forEach> <!-- <tr><td colspan=8 align=center> DB 연동 실패(아직 구현중)  -->
+					</c:forEach>
 					</tbody>
 			</table>
 			<div align=center>&nbsp;<span class="pagingNumber"></span>&nbsp;</div>
@@ -612,21 +584,7 @@ $(document).ready(function(){
     <!-- /MAIN CONTENT -->
     <!--main content end-->
     <!--footer start-->
-    <!--     <footer class="site-footer">
-      <div class="text-center">
-        <p>
-			KOSMO 자바&빅데이터 과정 팀프로젝트
-        </p>
-        <div class="credits">
-        <font style="font-size:12pt;">
-        ⓒ Copyrights <strong>조충래, 김태현, 박현우, 이동하, 임남희, 최민지</strong>
-         </font>
-        </div>
-        <a href="basic_table.html#" class="go-top">
-          <i class="fa fa-angle-up"></i>
-          </a>
-      </div>
-    </footer> -->
+
     <!--footer end-->
   </section>
   
