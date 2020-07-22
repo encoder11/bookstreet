@@ -183,7 +183,6 @@ public class InvenController extends CommonMethod {
 			,Cus_releaseInfoDTO cus_releaseInfoDTO
 			) {
 		
-		
 		String orderSize = all_order_no+"";
 		Cus_releaseInfoDTO all_order = null;
 		String cus = "cus";
@@ -194,21 +193,16 @@ public class InvenController extends CommonMethod {
 				Cus_releaseInfoDTO cus_order = this.invenService.getReleaseCusInfo(all_order_no);
 				cus_order.setCheck_order_num(cus);
 				all_order = cus_order;
-				//mav.addObject("cus_order", cus_order);
 			}else {
 				Cus_releaseInfoDTO corp_order = this.invenService.getReleaseCorpInfo(all_order_no);
 				corp_order.setCheck_order_num(corp);
-				
 				all_order = corp_order;
-				//mav.addObject("corp_order", corp_order);
 			}
-			
-			//mav.addObject("orderSize", orderSize);
+		
 		}catch(Exception e) {
 			System.out.println("<출고 상세 정보 불러오기 실패>");
 			System.out.println("예외발생 =>"+e);
 		}
-		
 		
 		return all_order;
 	}
@@ -312,8 +306,6 @@ public class InvenController extends CommonMethod {
 		mav.setViewName("main.jsp");
 		mav.addObject("subMenu", "viewBookContentForm");
 		
-		//System.out.println(isbn13_search);
-		
 		try {
 			
 			BookInfoDTO bookInfo = this.invenService.getBookInfo(isbn13_search);
@@ -377,13 +369,9 @@ public class InvenController extends CommonMethod {
 			isbn_cnt = this.invenService.getIsbnCnt(all_order_no);
 			
 			if(isbn_cnt>order_cnt) {
-				
 				releaseUpCnt = this.invenService.getReleaseUpCnt(all_order_no);
-				
 			}else{
-				
 				return releaseUpCnt = -1;
-				
 			}
 			
 		}catch(Exception e) {
