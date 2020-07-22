@@ -5,24 +5,26 @@
 
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
-
+<!-- C태그를 활용하여 태그변수를 생성 / 길어지는 수입 코드를 간략화 할수 있다. -->
 <c:set var="ctRoot" value="/group4erp" />
-
 <c:set var="ctRootImage" value="${ctRoot}/resources/image"/>
 <c:set var="ctRootImg" value="${ctRoot}/resources/img"/>
 <c:set var="ctRootcss" value="${ctRoot}/resources/css"/>
 <c:set var="ctRootlib" value="${ctRoot}/resources/lib"/>
 
 
-<!-- css 파일 & jquery 라이브러리 파일 수입 -->
-<!-- <link href="${pageContext.request.contextPath}/resources/test.css?ver=1" rel="stylesheet" type="text/css"> -->
-<!-- <link href="${ctRoot}/resources/common.css" rel="stylesheet" type="text/css"> -->
+<!-- css 파일 & jquery 라이브러리 파일 수입
+		자체적으로 만든 CSS & 공용함수 파일 수입 -->
 <link href="/group4erp/resources/test.css?ver=1" rel="stylesheet" type="text/css">
 <link href="/group4erp/resources/component.css" rel="stylesheet" type="text/css">
 <script src = "${ctRoot}/resources/jquery-1.11.0.min.js" type="text/javascript"></script>
 <script src = "${ctRoot}/resources/common.js?ver=1"></script>
 <link href="${ctRootImg}/favicon.png" rel="icon">
 <link href="${ctRootImg}/apple-touch-icon.png" rel="apple-touch-icon">
+
+
+<!-- 부트스트랩 수입 코드 -->
+
 
 <!-- Bootstrap core CSS -->
 <link href="${ctRootlib}/bootstrap/css/bootstrap.min.css" rel="stylesheet">
