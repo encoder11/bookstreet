@@ -76,6 +76,7 @@ public class InvenController extends CommonMethod {
 		}
 	}
 	*/
+	//재고현황 -> 도서정보조회
 	@RequestMapping(value="/goBookList.do")
 	public ModelAndView goBookInvenList(
 			HttpSession session
@@ -85,7 +86,6 @@ public class InvenController extends CommonMethod {
 		ModelAndView mav = new ModelAndView();
 		mav.setViewName("main.jsp");
 		mav.addObject("subMenu", "viewInventoryList");
-		mav.addObject("navigator", "[재고현황] → [도서정보조회]");
 		try {
 			
 			InvenService AutoInvenS = this.invenService;
@@ -132,6 +132,7 @@ public class InvenController extends CommonMethod {
 	}
 	
 
+	//재고현황 -> 출고현황조회
 	@RequestMapping(value="/goReleaseList.do")
 	public ModelAndView goBookReleaseInfo(
 			HttpSession session
@@ -141,7 +142,6 @@ public class InvenController extends CommonMethod {
 		ModelAndView mav = new ModelAndView();
 		mav.setViewName("main.jsp");
 		mav.addObject("subMenu", "viewReleaseList");
-		mav.addObject("navigator", "[재고현황] → [출고현황조회]");
 		
 		try {
 			
@@ -217,6 +217,7 @@ public class InvenController extends CommonMethod {
 	}
 		
 
+	//재고 현황 -> 반품현황조회
 	@RequestMapping(value="/goReturnOrderList.do")
 	public ModelAndView goReturnOrderList(HttpSession session, ReturnSearchDTO returnSearchDTO) {
 		
@@ -224,7 +225,6 @@ public class InvenController extends CommonMethod {
 		
 		mav.setViewName("main.jsp");
 		mav.addObject("subMenu", "viewReturnOrderList");
-		mav.addObject("navigator", "[재고현황] → [반품현황조회]");
 		
 		try {
 			int returnOrderCnt = this.invenService.getReturnOrderCnt(returnSearchDTO);
@@ -261,6 +261,7 @@ public class InvenController extends CommonMethod {
 		return returnInfo;
 	}
 	
+	//재고현황 -> 도서정보조회 -> 도서등록
 	@RequestMapping(value="/viewSignUpBook.do")
 	public ModelAndView viewSignUpBook() {
 		
@@ -268,7 +269,6 @@ public class InvenController extends CommonMethod {
 		
 		mav.setViewName("main.jsp");
 		mav.addObject("subMenu", "viewSignUpBook");
-		mav.addObject("navigator", "[재고현황] → [도서정보조회] → [도서등록]");
 		
 		List<Map<String, String>> size = getSizeList();
 		mav.addObject("size", size);
@@ -302,6 +302,7 @@ public class InvenController extends CommonMethod {
 		return insertSignUpBookCnt;
 	}
 	
+	//재고 현황 -> 도서정보조회 -> 상세정보
 	@RequestMapping(value="/viewBookContentForm.do")
 	public ModelAndView viewBookContentForm(
 			@RequestParam(value="isbn13_search") String isbn13_search
@@ -313,7 +314,6 @@ public class InvenController extends CommonMethod {
 		
 		mav.setViewName("main.jsp");
 		mav.addObject("subMenu", "viewBookContentForm");
-		mav.addObject("navigator", "[재고현황] → [도서정보조회] → [상세정보]");
 		
 		//System.out.println(isbn13_search);
 		
