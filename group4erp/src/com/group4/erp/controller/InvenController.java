@@ -175,6 +175,7 @@ public class InvenController extends CommonMethod {
 		return mav;
 	}
 	
+	//재고 현황 -> 출고현황조회 -> 상세보기
 	@RequestMapping(value="/goReleaseContentForm.do")
 	@ResponseBody
 	public Cus_releaseInfoDTO goReleaseContentForm(
@@ -182,10 +183,6 @@ public class InvenController extends CommonMethod {
 			,Cus_releaseInfoDTO cus_releaseInfoDTO
 			) {
 		
-		//ModelAndView mav = new ModelAndView();
-		//mav.setViewName("main.jsp");
-		//mav.addObject("subMenu", "viewReleaseContent");
-		//mav.addObject("navigator", "[재고현황]-[출고현황조회]-[상세보기]");
 		
 		String orderSize = all_order_no+"";
 		Cus_releaseInfoDTO all_order = null;
