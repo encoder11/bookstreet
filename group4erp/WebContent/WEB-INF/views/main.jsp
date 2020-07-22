@@ -149,10 +149,7 @@ function showTime() {
 			<c:if test="${subMenu.equals('viewReleaseList') }">
 				<%@ include file="/WEB-INF/views/bookReleaseInfo.jsp" %>
 			</c:if>
-			<!-- 출고 세부정보 조회 -->
-			<c:if test="${subMenu.equals('viewReleaseContent') }">
-				<%@ include file="/WEB-INF/views/bookReleaseContentInfo.jsp" %>
-			</c:if>
+
 		
 			<!-- 직원현황조회 -->
 			<c:if test="${subMenu.equals('viewEmpList') }">
@@ -195,26 +192,23 @@ function showTime() {
 			</c:if>
 			
 
-			<!-- 어음정보 조회 -->
-			<c:if test="${subMenu.equals('viewPromiNoteList') }">
-				<%@ include file="/WEB-INF/views/promiNoteListForm.jsp" %>
-			</c:if>
-
 			<!-- 세금계산서 발급 내역 조회 -->
+			<%--
 			<c:if test="${subMenu.equals('viewTaxInvoiceList') }">
 				<%@ include file="/WEB-INF/views/taxInvoiceList.jsp" %>
 			</c:if>
-
+ --%>
 			<!-- 담당 상품 조회 -->
 			<c:if test="${subMenu.equals('viewMyCareBookList') }">
 				<%@ include file="/WEB-INF/views/mycarebooklist.jsp" %>
 			</c:if>
 						
+			<%--
 			<!-- 세금계산서 발급화면 -->
 			<c:if test="${subMenu.equals('viewTaxInvoiceForm') }">
 				<%@ include file="/WEB-INF/views/taxInvoiceForm.jsp" %>
 			</c:if>
-			
+			 --%>
 			<!-- 거래처 현황 조회 -->
 			<c:if test="${subMenu.equals('viewCorpList') }">
 				<%@ include file="/WEB-INF/views/corpList.jsp" %>
@@ -229,10 +223,6 @@ function showTime() {
 				<%@ include file="/WEB-INF/views/bestKeywdAnalysis.jsp" %>
 			</c:if>
 
-			<c:if test="${subMenu.equals('mySchedule') }">
-				<%@ include file="/WEB-INF/views/mySchedule.jsp" %>
-			</c:if>
-			
 			<%-- <c:if test="${subMenu.equals('workOutReport') }">
 				<%@ include file="/WEB-INF/views/workOutReport.jsp" %>
 			</c:if> --%>
@@ -252,11 +242,7 @@ function showTime() {
 			<c:if test="${subMenu.equals('viewAdApplyList') }">
 				<%@ include file="/WEB-INF/views/adApplyInfoPage.jsp" %>
 			</c:if>
-			
-			<c:if test="${subMenu.equals('viewInsertAdApply') }">
-				<%@ include file="/WEB-INF/views/adInsertForm.jsp" %>
-			</c:if>
-			
+
 			<c:if test="${subMenu.equals('viewMyWorkTime') }">
 				<%@ include file="/WEB-INF/views/workTimeList.jsp" %>
 			</c:if>
