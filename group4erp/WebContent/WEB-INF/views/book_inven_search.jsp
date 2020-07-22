@@ -8,8 +8,8 @@
 <html lang="ko">
 <!--
   	BootStrap의 수입 코드는 차트 등  특별한 경우를 제외하고 똑같다.
-  	따로 수입하는 JSP파일을 생성하고 처리 할 수 있도록 만든다.
-  	ss
+  	따로 수입하는 JSP파일을 생성하고 처리 할 수 있도록 만든다.			-> 해결(include_master.jsp 생성함)
+  	
   	해당 작업을 하기 기존 CSS가 겹치는지 확인
   		-> 먼저 테이블들의 id or name or class 값을 통일 및 CSS값 통일 작업
   	
@@ -26,6 +26,8 @@
   		-> 이것이 가능하다면 모든 페이지에서 활용도가 높음
   	==> 위의 게시판이 함수화가 된다면 해당 게시판의 Header도 함수화가 가능할 것.
   		-> 현재 너무 길게늘어져있어서 보기 안좋으며 같은 함수를 계속 호출함
+  	
+  	들여쓰기 및 띄어쓰기가 일정하지가 않아 가독성이 심히 떨어진다.
   	
    -->
 <head>
@@ -114,20 +116,12 @@ $(document).ready(function(){
 	});
 
 	   function goSearchBookInven(){
-	      //alert("검색기능 구현중");
-
-	      //alert(  $("[name=book_inventory_search_form]").serialize()   );
-	  
-	      //alert(  $("[name=book_inventory_search_form]").serialize()   );
 
 	      document.book_inventory_search_form.submit();
 	   }
 
 
 	   function goAllSearchBookInven(){
-	      //alert("모두검색기능 구현중");
-	      //document.book_inventory_search_form.reset();
-	      //goSearchBookInven();
 
 			document.book_inventory_search_form.reset();
 			$("[name=book_inventory_search_form] [name=selectPageNo]").val(1);
@@ -137,14 +131,10 @@ $(document).ready(function(){
 	   }
 	   
 	   function goNewBookInfo(){
-		   //alert("책등록 구현중");
-		   //return;
 		   location.href="/group4erp/viewSignUpBook.do";
 	   }
 	   
 	   function goBookContentForm(isbn13_search){
-		   //alert("상세보기 구현중"+str);
-		   //return;
 		   var str = "isbn13_search="+isbn13_search;
 		   location.href="/group4erp/viewBookContentForm.do?"+str;
 	   }
